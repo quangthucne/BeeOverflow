@@ -1,10 +1,9 @@
 <script setup></script>
 
 <template>
-<footer class="bg-dark text-white pt-3 pb-2 mt-4">
+  <footer class="bg-dark text-white pt-3 pb-2 mt-4">
     <div class="container">
       <div class="row align-items-center">
-
         <!-- Logo + brand -->
         <div class="col-md-4 mb-4 mb-md-0 text-center text-md-start">
           <img
@@ -12,11 +11,13 @@
             alt=""
             width="50px"
             height="50px"
-            class="ms-4"
+            class="ms-4 rounded"
           />
           <a>
-          <RouterLink to="/" class="nav-link fw-bold"> Bee<span class="text-warning fw-bold">overflow</span></RouterLink></a
-              >
+            <RouterLink to="/" class="nav-link fw-bold">
+              Bee<span class="text-warning fw-bold">overflow</span></RouterLink
+            ></a
+          >
         </div>
 
         <!-- Quote + Hashtag -->

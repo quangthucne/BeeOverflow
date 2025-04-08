@@ -6,14 +6,16 @@
       <div class="container">
         <a class="navbar-brand fw-bold d-flex align-items-center" href="#">
           <a class="nav-link" href="#"
-                ><RouterLink to="/" class="nav-link"> Bee<span class="text-warning">overflow</span></RouterLink></a
-              >
+            ><RouterLink to="/" class="nav-link">
+              Bee<span class="text-warning">overflow</span></RouterLink
+            ></a
+          >
           <img
             src="../../assets/image/beeoverflow.jpg"
             alt=""
-            width="50px"
-            height="50px"
-            class="ms-2"
+            width="50"
+            height="50"
+            class="ms-2 rounded"
           />
         </a>
         <div class="d-flex">
@@ -44,7 +46,9 @@
               >
             </li>
             <li class="nav-item">
-              <RouterLink to="/" class="btn btn-outline-primary btn-outline-primary mt-2">Thêm câu hỏi</RouterLink>
+              <RouterLink to="/" class="btn btn-outline-primary btn-outline-primary mt-2"
+                >Thêm câu hỏi</RouterLink
+              >
             </li>
           </ul>
         </div>
@@ -64,14 +68,12 @@
               placeholder="Search..."
               aria-label="Search"
             />
-            <button class="btn btn-outline-light" type="submit">Tìm </button>
+            <button class="btn btn-outline-light" type="submit">Tìm</button>
           </form>
           <RouterLink to="/login" class="btn btn-outline-warning me-2">Đăng nhập</RouterLink>
           <RouterLink to="/register" class="btn btn btn-warning me-2">Đăng ký</RouterLink>
-
         </div>
       </div>
     </nav>
   </header>
 </template>
-

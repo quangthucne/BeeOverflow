@@ -1,14 +1,15 @@
 package com.beeoverflow.apibeeoverflow.entities;
 
 import jakarta.persistence.*;
-import lombok.*;
+import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
+@Setter
 @Entity
 @Table(name = "rank")
 public class Rank {
@@ -17,9 +18,11 @@ public class Rank {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "name", nullable = false, length = 50)
+    @Size(max = 100)
+    @Column(name = "name", length = 100)
     private String name;
 
+    @Size(max = 255)
     @Column(name = "icon")
     private String icon;
 

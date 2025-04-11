@@ -1,13 +1,14 @@
 package com.beeoverflow.apibeeoverflow.entities;
 
 import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+@Getter
+@Setter
 @Entity
 @Table(name = "document")
 public class Document {
@@ -16,13 +17,15 @@ public class Document {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "account_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id")
     private Account account;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "doc_detail_id", nullable = false)
-    private DocDetail docDetail;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "doc_detail_id")
+    private DocumentDetail docDetail;
+
+    @OneToMany(mappedBy = "doc")
+    private Set<OrderDetail> orderDetails = new LinkedHashSet<>();
 
 }

@@ -2,132 +2,117 @@
 CREATE DATABASE bee_overflow;
 USE bee_overflow;
 
--- Create table: rank
-CREATE TABLE `rank` (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(50) NOT NULL,
+-- Bảng Rank
+CREATE TABLE rank (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
     icon VARCHAR(255)
 );
 
--- Create table: roles
-CREATE TABLE roles (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(50) NOT NULL
-);
-
--- Create table: account
+-- Bảng Account
 CREATE TABLE account (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    fullname VARCHAR(100),
-    email VARCHAR(100) NOT NULL UNIQUE,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) NOT NULL,
+    fullname VARCHAR(255),
+    email VARCHAR(255),
     avatar VARCHAR(255),
     phone VARCHAR(20),
-    password VARCHAR(255) NOT NULL,
-    point INT DEFAULT 0,
-    isActive BOOLEAN DEFAULT TRUE
+    password VARCHAR(255),
+    isActive BOOLEAN DEFAULT TRUE,
+    role VARCHAR(50)
 );
 
--- Create table: reputation
+-- Bảng Reputation
 CREATE TABLE reputation (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    account_id INT NOT NULL,
-    rank_id INT NOT NULL,
-    point INT NOT NULL,
-    FOREIGN KEY (account_id) REFERENCES account(id) ON DELETE CASCADE,
-    FOREIGN KEY (rank_id) REFERENCES `rank`(id) ON DELETE RESTRICT
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    account_id INT,
+    rank_id INT,
+    point INT,
+    FOREIGN KEY (account_id) REFERENCES account(id),
+    FOREIGN KEY (rank_id) REFERENCES rank(id)
 );
 
--- Create table: authentication
-CREATE TABLE authentication (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    account_id INT NOT NULL,
-    role_id INT NOT NULL,
-    FOREIGN KEY (account_id) REFERENCES account(id) ON DELETE CASCADE,
-    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE RESTRICT
-);
-
--- Create table: questions
+-- Bảng Questions
 CREATE TABLE questions (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    account_id INT NOT NULL,
-    title VARCHAR(255) NOT NULL,
-    content TEXT NOT NULL,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    account_id INT,
+    title VARCHAR(255),
+    content TEXT,
     detail TEXT,
     isDeleted BOOLEAN DEFAULT FALSE,
     isCheck BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (account_id) REFERENCES account(id) ON DELETE CASCADE
+    FOREIGN KEY (account_id) REFERENCES account(id)
 );
 
--- Create table: question_vote
-CREATE TABLE question_vote (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    question_id INT NOT NULL,
-    count INT DEFAULT 0,
-    FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE
-);
-
--- Create table: tags
-CREATE TABLE tags (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    question_id INT NOT NULL,
-    name VARCHAR(50) NOT NULL,
-    FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE
-);
-
--- Create table: answer
+-- Bảng Answer
 CREATE TABLE answer (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    account_id INT NOT NULL,
-    question_id INT NOT NULL,
-    content TEXT NOT NULL,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    account_id INT,
+    ques_id INT,
+    content TEXT,
     detail TEXT,
     isDeleted BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (account_id) REFERENCES account(id) ON DELETE CASCADE,
-    FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE
+    FOREIGN KEY (account_id) REFERENCES account(id),
+    FOREIGN KEY (ques_id) REFERENCES questions(id)
 );
 
--- Create table: ans_vote
-CREATE TABLE ans_vote (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    ans_id INT NOT NULL,
+-- Bảng Question Vote
+CREATE TABLE question_vote (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ques_id INT,
     count INT DEFAULT 0,
-    FOREIGN KEY (ans_id) REFERENCES answer(id) ON DELETE CASCADE
+    FOREIGN KEY (ques_id) REFERENCES questions(id)
 );
 
--- Create table: doc_detail
-CREATE TABLE doc_detail (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    name_doc VARCHAR(255) NOT NULL,
+-- Bảng Answer Vote
+CREATE TABLE ans_vote (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ans_id INT,
+    count INT DEFAULT 0,
+    FOREIGN KEY (ans_id) REFERENCES answer(id)
+);
+
+-- Bảng Tags
+CREATE TABLE tags (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    question_id INT,
+    name VARCHAR(100),
+    FOREIGN KEY (question_id) REFERENCES questions(id)
+);
+
+-- Bảng Document Detail
+CREATE TABLE document_detail (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name_doc VARCHAR(255),
     description TEXT,
     doc_src VARCHAR(255),
     price DECIMAL(10, 2),
     isDeleted BOOLEAN DEFAULT FALSE
 );
 
--- Create table: document
+-- Bảng Document
 CREATE TABLE document (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    account_id INT NOT NULL,
-    doc_detail_id INT NOT NULL,
-    FOREIGN KEY (account_id) REFERENCES account(id) ON DELETE CASCADE,
-    FOREIGN KEY (doc_detail_id) REFERENCES doc_detail(id) ON DELETE RESTRICT
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    account_id INT,
+    doc_detail_id INT,
+    FOREIGN KEY (account_id) REFERENCES account(id),
+    FOREIGN KEY (doc_detail_id) REFERENCES document_detail(id)
 );
 
--- Create table: order
+-- Bảng Order
 CREATE TABLE `order` (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    account_id INT NOT NULL,
-    FOREIGN KEY (account_id) REFERENCES account(id) ON DELETE CASCADE
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    account_id INT,
+    FOREIGN KEY (account_id) REFERENCES account(id)
 );
 
--- Create table: order_detail
+-- Bảng Order Detail
 CREATE TABLE order_detail (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    order_id INT NOT NULL,
-    doc_id INT NOT NULL,
-    price DECIMAL(10, 2) NOT NULL,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT,
+    doc_id INT,
+    price DECIMAL(10, 2),
     created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (order_id) REFERENCES `order`(id) ON DELETE CASCADE,
-    FOREIGN KEY (doc_id) REFERENCES doc_detail(id) ON DELETE RESTRICT
+    FOREIGN KEY (order_id) REFERENCES `order`(id),
+    FOREIGN KEY (doc_id) REFERENCES document(id)
 );

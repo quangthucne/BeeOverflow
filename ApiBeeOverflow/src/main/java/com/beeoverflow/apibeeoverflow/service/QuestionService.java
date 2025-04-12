@@ -83,4 +83,16 @@ public class QuestionService {
 
         return newQues;
     }
+
+    public Question deleteQuestion(QuestionBean questionBean) {
+        Question question = questionJPA.findById(questionBean.getId());
+        question.setIsDeleted(true);
+        Question delQues = questionJPA.save(question);
+
+        if (delQues.getIsDeleted()) {
+            return delQues;
+        } else {
+            return null;
+        }
+    }
 }

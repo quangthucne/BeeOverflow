@@ -62,8 +62,13 @@ public class QuesController {
         return ResponseEntity.ok(response);
     }
 
-//    @PostMapping("/delete")
-//    public ResponseEntity<> post() {
-//        return ResponseEntity.ok("");
-//    }
+    @PostMapping("/delete")
+    public ResponseEntity<Response> deleteQuestion(@Valid QuestionBean questionBean, Errors errors) {
+        Response response = new Response();
+        Question delQues = questionService.deleteQuestion(questionBean);
+        response.setMessage(delQues.getIsDeleted()?"Success":"Failed");
+        response.setStatus(1);
+        response.setData(delQues);
+        return ResponseEntity.ok(response);
+    }
 }

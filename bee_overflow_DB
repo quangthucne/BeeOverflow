@@ -2,117 +2,212 @@
 CREATE DATABASE bee_overflow;
 USE bee_overflow;
 
--- Bảng Rank
-CREATE TABLE rank (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100),
-    icon VARCHAR(255)
+-- we don't know how to generate root <with-no-name> (class Root) :(
+
+grant select on performance_schema.* to 'mysql.session'@localhost;
+
+grant trigger on sys.* to 'mysql.sys'@localhost;
+
+grant audit_abort_exempt, firewall_exempt, select, system_user on *.* to 'mysql.infoschema'@localhost;
+
+grant audit_abort_exempt, authentication_policy_admin, backup_admin, clone_admin, connection_admin, firewall_exempt, persist_ro_variables_admin, session_variables_admin, shutdown, super, system_user, system_variables_admin on *.* to 'mysql.session'@localhost;
+
+grant audit_abort_exempt, firewall_exempt, system_user on *.* to 'mysql.sys'@localhost;
+
+grant allow_nonexistent_definer, alter, alter routine, application_password_admin, audit_abort_exempt, audit_admin, authentication_policy_admin, backup_admin, binlog_admin, binlog_encryption_admin, clone_admin, connection_admin, create, create role, create routine, create tablespace, create temporary tables, create user, create view, create_spatial_reference_system, delete, drop, drop role, encryption_key_admin, event, execute, file, firewall_exempt, flush_optimizer_costs, flush_privileges, flush_status, flush_tables, flush_user_resources, group_replication_admin, group_replication_stream, index, innodb_redo_log_archive, innodb_redo_log_enable, insert, lock tables, optimize_local_table, passwordless_user_admin, persist_ro_variables_admin, process, references, reload, replication client, replication slave, replication_applier, replication_slave_admin, resource_group_admin, resource_group_user, role_admin, select, sensitive_variables_observer, service_connection_admin, session_variables_admin, set_any_definer, show databases, show view, show_routine, shutdown, super, system_user, system_variables_admin, table_encryption_admin, telemetry_log_admin, transaction_gtid_tag, trigger, update, xa_recover_admin, grant option on *.* to root;
+
+grant allow_nonexistent_definer, alter, alter routine, application_password_admin, audit_abort_exempt, audit_admin, authentication_policy_admin, backup_admin, binlog_admin, binlog_encryption_admin, clone_admin, connection_admin, create, create role, create routine, create tablespace, create temporary tables, create user, create view, create_spatial_reference_system, delete, drop, drop role, encryption_key_admin, event, execute, file, firewall_exempt, flush_optimizer_costs, flush_privileges, flush_status, flush_tables, flush_user_resources, group_replication_admin, group_replication_stream, index, innodb_redo_log_archive, innodb_redo_log_enable, insert, lock tables, optimize_local_table, passwordless_user_admin, persist_ro_variables_admin, process, references, reload, replication client, replication slave, replication_applier, replication_slave_admin, resource_group_admin, resource_group_user, role_admin, select, sensitive_variables_observer, service_connection_admin, session_variables_admin, set_any_definer, show databases, show view, show_routine, shutdown, super, system_user, system_variables_admin, table_encryption_admin, telemetry_log_admin, transaction_gtid_tag, trigger, update, xa_recover_admin, grant option on *.* to root@localhost;
+
+create table account
+(
+    id        int auto_increment
+        primary key,
+    username  varchar(100)            not null,
+    fullname  varchar(255)            null,
+    email     varchar(255)            null,
+    avatar    varchar(255)            null,
+    phone     varchar(20)             null,
+    password  varchar(255)            null,
+    isActive  tinyint(1) default 1    null,
+    role      int                     not null,
+    gender    int                     not null,
+    is_active bit        default b'1' null
 );
 
--- Bảng Account
-CREATE TABLE account (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(100) NOT NULL,
-    fullname VARCHAR(255),
-    email VARCHAR(255),
-    avatar VARCHAR(255),
-    phone VARCHAR(20),
-    password VARCHAR(255),
-    isActive BOOLEAN DEFAULT TRUE,
-    role VARCHAR(50)
+create table document_detail
+(
+    id          int auto_increment
+        primary key,
+    name_doc    varchar(255)            null,
+    description tinytext                null,
+    doc_src     varchar(255)            null,
+    price       decimal(10, 2)          null,
+    isDeleted   tinyint(1) default 0    null,
+    is_deleted  bit        default b'0' null
 );
 
--- Bảng Reputation
-CREATE TABLE reputation (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    account_id INT,
-    rank_id INT,
-    point INT,
-    FOREIGN KEY (account_id) REFERENCES account(id),
-    FOREIGN KEY (rank_id) REFERENCES rank(id)
+create table document
+(
+    id            int auto_increment
+        primary key,
+    account_id    int null,
+    doc_detail_id int null,
+    constraint document_ibfk_1
+        foreign key (account_id) references account (id),
+    constraint document_ibfk_2
+        foreign key (doc_detail_id) references document_detail (id)
 );
 
--- Bảng Questions
-CREATE TABLE questions (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    account_id INT,
-    title VARCHAR(255),
-    content TEXT,
-    detail TEXT,
-    isDeleted BOOLEAN DEFAULT FALSE,
-    isCheck BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (account_id) REFERENCES account(id)
+create index account_id
+    on document (account_id);
+
+create index doc_detail_id
+    on document (doc_detail_id);
+
+create table `order`
+(
+    id         int auto_increment
+        primary key,
+    account_id int null,
+    constraint order_ibfk_1
+        foreign key (account_id) references account (id)
 );
 
--- Bảng Answer
-CREATE TABLE answer (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    account_id INT,
-    ques_id INT,
-    content TEXT,
-    detail TEXT,
-    isDeleted BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (account_id) REFERENCES account(id),
-    FOREIGN KEY (ques_id) REFERENCES questions(id)
+create index account_id
+    on `order` (account_id);
+
+create table order_detail
+(
+    id           int auto_increment
+        primary key,
+    order_id     int                                null,
+    doc_id       int                                null,
+    price        decimal(10, 2)                     null,
+    created_date datetime default CURRENT_TIMESTAMP null,
+    constraint order_detail_ibfk_1
+        foreign key (order_id) references `order` (id),
+    constraint order_detail_ibfk_2
+        foreign key (doc_id) references document (id)
 );
 
--- Bảng Question Vote
-CREATE TABLE question_vote (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    ques_id INT,
-    count INT DEFAULT 0,
-    FOREIGN KEY (ques_id) REFERENCES questions(id)
+create index doc_id
+    on order_detail (doc_id);
+
+create index order_id
+    on order_detail (order_id);
+
+create table questions
+(
+    id           int auto_increment
+        primary key,
+    account_id   int              null,
+    title        varchar(255)     null,
+    detail       tinytext         null,
+    is_check     bit default b'0' null,
+    is_deleted   bit default b'0' null,
+    created_date datetime         null,
+    constraint questions_ibfk_1
+        foreign key (account_id) references account (id)
 );
 
--- Bảng Answer Vote
-CREATE TABLE ans_vote (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    ans_id INT,
-    count INT DEFAULT 0,
-    FOREIGN KEY (ans_id) REFERENCES answer(id)
+create table answer
+(
+    id         int auto_increment
+        primary key,
+    account_id int                     null,
+    ques_id    int                     null,
+    content    tinytext                null,
+    detail     tinytext                null,
+    isDeleted  tinyint(1) default 0    null,
+    is_deleted bit        default b'0' null,
+    constraint answer_ibfk_1
+        foreign key (account_id) references account (id),
+    constraint answer_ibfk_2
+        foreign key (ques_id) references questions (id)
 );
 
--- Bảng Tags
-CREATE TABLE tags (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    question_id INT,
-    name VARCHAR(100),
-    FOREIGN KEY (question_id) REFERENCES questions(id)
+create table ans_vote
+(
+    id     int auto_increment
+        primary key,
+    ans_id int           null,
+    count  int default 0 null,
+    constraint ans_vote_ibfk_1
+        foreign key (ans_id) references answer (id)
 );
 
--- Bảng Document Detail
-CREATE TABLE document_detail (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name_doc VARCHAR(255),
-    description TEXT,
-    doc_src VARCHAR(255),
-    price DECIMAL(10, 2),
-    isDeleted BOOLEAN DEFAULT FALSE
+create index ans_id
+    on ans_vote (ans_id);
+
+create index account_id
+    on answer (account_id);
+
+create index ques_id
+    on answer (ques_id);
+
+create table images_ques
+(
+    id      int auto_increment
+        primary key,
+    name    varchar(255) null,
+    ques_id int          not null,
+    constraint images_ques_questions_id_fk
+        foreign key (ques_id) references questions (id)
 );
 
--- Bảng Document
-CREATE TABLE document (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    account_id INT,
-    doc_detail_id INT,
-    FOREIGN KEY (account_id) REFERENCES account(id),
-    FOREIGN KEY (doc_detail_id) REFERENCES document_detail(id)
+create table question_vote
+(
+    id      int auto_increment
+        primary key,
+    ques_id int           null,
+    count   int default 0 null,
+    constraint question_vote_ibfk_1
+        foreign key (ques_id) references questions (id)
 );
 
--- Bảng Order
-CREATE TABLE `order` (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    account_id INT,
-    FOREIGN KEY (account_id) REFERENCES account(id)
+create index ques_id
+    on question_vote (ques_id);
+
+create index account_id
+    on questions (account_id);
+
+create table `rank`
+(
+    id   int auto_increment
+        primary key,
+    name varchar(100) null,
+    icon varchar(255) null
 );
 
--- Bảng Order Detail
-CREATE TABLE order_detail (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    order_id INT,
-    doc_id INT,
-    price DECIMAL(10, 2),
-    created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (order_id) REFERENCES `order`(id),
-    FOREIGN KEY (doc_id) REFERENCES document(id)
+create table reputation
+(
+    id         int auto_increment
+        primary key,
+    account_id int null,
+    rank_id    int null,
+    point      int null,
+    constraint reputation_ibfk_1
+        foreign key (account_id) references account (id),
+    constraint reputation_ibfk_2
+        foreign key (rank_id) references `rank` (id)
 );
+
+create index account_id
+    on reputation (account_id);
+
+create index rank_id
+    on reputation (rank_id);
+
+create table tags
+(
+    id          int auto_increment
+        primary key,
+    question_id int          null,
+    name        varchar(100) null,
+    constraint tags_ibfk_1
+        foreign key (question_id) references questions (id)
+);
+
+create index question_id
+    on tags (question_id);
+

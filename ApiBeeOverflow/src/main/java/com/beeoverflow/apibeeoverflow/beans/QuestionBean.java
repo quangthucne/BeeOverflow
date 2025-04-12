@@ -1,5 +1,6 @@
 package com.beeoverflow.apibeeoverflow.beans;
 
+import com.beeoverflow.apibeeoverflow.entities.Tag;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,6 +23,8 @@ public class QuestionBean {
 
     @NotBlank
     private String detail;
+
+    private List<Tag> tags;
 
     private List<MultipartFile> images;
 

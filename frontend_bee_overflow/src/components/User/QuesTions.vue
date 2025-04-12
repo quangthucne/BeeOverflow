@@ -6,7 +6,7 @@ const questions = ref([])
 const maxVisibleImages = 4
 
 function getImageUrl(name) {
-  return `http://localhost:8080/api/image/${name}`
+  return `http://localhost:8080/images/questions/${name}`
 }
 
 function visibleImages(images) {

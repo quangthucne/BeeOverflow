@@ -1,17 +1,24 @@
 package com.beeoverflow.apibeeoverflow.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
+@Setter
 @Entity
 @Table(name = "questions")
 public class Question {
@@ -20,37 +27,42 @@ public class Question {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "account_id", nullable = false)
+    @JsonManagedReference
+    @ManyToOne()
+    @JoinColumn(name = "account_id")
     private Account account;
 
-    @Column(name = "title", nullable = false)
+    @Size(max = 255)
+    @Column(name = "title")
     private String title;
-
-    @Lob
-    @Column(name = "content", nullable = false)
-    private String content;
 
     @Lob
     @Column(name = "detail")
     private String detail;
 
     @ColumnDefault("0")
-    @Column(name = "isDeleted")
+    @Column(name = "is_deleted")
     private Boolean isDeleted;
 
     @ColumnDefault("0")
-    @Column(name = "isCheck")
+    @Column(name = "is_check")
     private Boolean isCheck;
 
-    @OneToMany(mappedBy = "question")
+    @OneToMany(mappedBy = "ques", fetch = FetchType.LAZY)
     private Set<Answer> answers = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "question")
+    @OneToMany(mappedBy = "ques", fetch = FetchType.LAZY)
     private Set<QuestionVote> questionVotes = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "question")
+    @OneToMany(mappedBy = "question", fetch = FetchType.LAZY)
     private Set<Tag> tags = new LinkedHashSet<>();
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "ques", fetch = FetchType.LAZY)
+    private List<ImagesQue> imagesQues;
+
+
+    @Column(name = "created_date")
+    private LocalDateTime createdDate;
 
 }

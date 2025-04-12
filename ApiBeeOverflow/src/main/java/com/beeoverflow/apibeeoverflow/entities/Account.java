@@ -1,15 +1,23 @@
 package com.beeoverflow.apibeeoverflow.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
+@Setter
 @Entity
 @Table(name = "account")
 public class Account {
@@ -18,40 +26,42 @@ public class Account {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "username", nullable = false, length = 50)
+    @Size(max = 100)
+    @NotNull
+    @Column(name = "username", nullable = false, length = 100)
     private String username;
 
-    @Column(name = "fullname", length = 100)
+    @Size(max = 255)
+    @Column(name = "fullname")
     private String fullname;
 
-    @Column(name = "email", nullable = false, length = 100)
+    @Size(max = 255)
+    @Column(name = "email")
     private String email;
 
+    @Size(max = 255)
     @Column(name = "avatar")
     private String avatar;
 
+    @Size(max = 20)
     @Column(name = "phone", length = 20)
     private String phone;
 
-    @Column(name = "password", nullable = false)
+    @Size(max = 255)
+    @Column(name = "password")
     private String password;
-
-    @Column(name = "gender", nullable = false)
-    private int gender;
-
-    @ColumnDefault("0")
-    @Column(name = "point")
-    private Integer point;
 
     @ColumnDefault("1")
     @Column(name = "isActive")
     private Boolean isActive;
 
-    @OneToMany(mappedBy = "account")
-    private Set<Answer> answers = new LinkedHashSet<>();
+    @Min(0)
+    @Max(2)
+    @Column(name = "role", length = 50)
+    private Integer role;
 
     @OneToMany(mappedBy = "account")
-    private Set<Authentication> authentications = new LinkedHashSet<>();
+    private Set<Answer> answers = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "account")
     private Set<Document> documents = new LinkedHashSet<>();
@@ -59,10 +69,15 @@ public class Account {
     @OneToMany(mappedBy = "account")
     private Set<Order> orders = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "account")
-    private Set<Question> questions = new LinkedHashSet<>();
+    @JsonBackReference
+    @OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
+    private List<Question> questions;
 
-    @OneToMany(mappedBy = "account")
+    @OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
     private Set<Reputation> reputations = new LinkedHashSet<>();
+
+    @NotNull
+    @Column(name = "gender", nullable = false)
+    private Integer gender;
 
 }

@@ -1,31 +1,34 @@
 package com.beeoverflow.apibeeoverflow.entities;
 
 import jakarta.persistence.*;
-import lombok.*;
+import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
+@Setter
 @Entity
-@Table(name = "doc_detail")
-public class DocDetail {
+@Table(name = "document_detail")
+public class DocumentDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "name_doc", nullable = false)
+    @Size(max = 255)
+    @Column(name = "name_doc")
     private String nameDoc;
 
     @Lob
     @Column(name = "description")
     private String description;
 
+    @Size(max = 255)
     @Column(name = "doc_src")
     private String docSrc;
 
@@ -38,8 +41,5 @@ public class DocDetail {
 
     @OneToMany(mappedBy = "docDetail")
     private Set<Document> documents = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "doc")
-    private Set<OrderDetail> orderDetails = new LinkedHashSet<>();
 
 }

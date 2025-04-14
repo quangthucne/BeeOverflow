@@ -7,6 +7,7 @@ import UserinfoView from '@/views/UserinfoView.vue'
 import QuestionView from '@/views/QuestionView.vue'
 import LoginView from '@/views/LoginView.vue'
 import RegisterView from '@/views/RegisterView.vue'
+import QuestionInputView from '@/views/QuestionInputView.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -49,6 +50,11 @@ const router = createRouter({
       path: '/register',
       name: 'register',
       component: RegisterView,
+    },
+    {
+      path: '/question/add',
+      name: 'add',
+      component: QuestionInputView,
     },
   ],
 })

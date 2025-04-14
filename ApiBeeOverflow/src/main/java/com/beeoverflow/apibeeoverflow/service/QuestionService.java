@@ -63,6 +63,7 @@ public class QuestionService {
         Question newQues = questionJPA.save(question);
 
         if(questionBean.getImages() != null) {
+            System.out.println(imageService.saveImage(questionBean.getImages().getFirst()));
             imageService.saveImagesQues(questionBean.getImages(), newQues);
         }
 

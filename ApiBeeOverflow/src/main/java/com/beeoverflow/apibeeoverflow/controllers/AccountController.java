@@ -26,7 +26,7 @@ public class AccountController {
     ImageService imageService;
 
     @PostMapping("/register")
-    public ResponseEntity<Response> register(@Valid @RequestBody AccountBean accountBean, Errors errors) {
+    public ResponseEntity<Response> register(@Valid AccountBean accountBean, Errors errors) {
 
         Response response = new Response();
 

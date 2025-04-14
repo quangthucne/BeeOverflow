@@ -3,6 +3,8 @@ package com.beeoverflow.apibeeoverflow.service;
 import com.beeoverflow.apibeeoverflow.entities.ImagesQue;
 import com.beeoverflow.apibeeoverflow.entities.Question;
 import com.beeoverflow.apibeeoverflow.jpas.ImagesQuesJPA;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,6 +17,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ImageService {
@@ -22,18 +25,13 @@ public class ImageService {
     @Autowired
     ImagesQuesJPA imagesQuesJPA;
 
+    @Autowired
+    Cloudinary cloudinary;
+
     public String saveAvatar(MultipartFile file) {
         try {
-            Path filePath = Paths.get("/images/avatar/");
-            //Tạo thư mục nếu chưa tồn tại
-            Files.createDirectories(filePath);
-
-            String fileName = String.format("%s.%s", (new Date()).getTime(), file.getContentType().split("/")[1]);
-
-            // Luu file co ten goc vao thu muc static/images
-            Files.copy(file.getInputStream(), filePath.resolve(fileName));
-
-            return fileName;
+            String url = saveImage(file);
+            return url;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -41,26 +39,20 @@ public class ImageService {
     }
 
     public void saveImagesQues (List<MultipartFile> files, Question question) {
-
-
         try {
-            Path filePath = Paths.get("images/questions/");
-
-            Files.createDirectories(filePath);
-
             for (MultipartFile file : files) {
                 ImagesQue imagesQue = new ImagesQue();
                 imagesQue.setQues(question);
 
-                String fileName = String.format("%s.%s", (new Date()).getTime(), "jpg");
-                Files.copy(file.getInputStream(), filePath.resolve(fileName));
-                System.out.println(fileName);
+                String url = saveImage(file);
 
-                imagesQue.setName(fileName);
+                System.out.println(url);
+
+                imagesQue.setName(url);
                 imagesQuesJPA.save(imagesQue);
 
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -80,6 +72,20 @@ public class ImageService {
         for (ImagesQue imagesQue : imagesQues) {
             deleteImage(imagesQue.getName());
             imagesQuesJPA.delete(imagesQue);
+        }
+    }
+
+    public String saveImage(MultipartFile file) {
+        try {
+            Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
+                    ObjectUtils.asMap("folder", "images")); // Optional: folder name in Cloudinary
+
+            String imageUrl = (String) uploadResult.get("secure_url");
+
+            return imageUrl;
+
+        } catch (IOException e) {
+            return e.getMessage();
         }
     }
 

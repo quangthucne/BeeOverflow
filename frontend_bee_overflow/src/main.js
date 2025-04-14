@@ -5,7 +5,7 @@ import App from './App.vue'
 import router from './router'
 import 'datatables.net-dt/css/dataTables.dataTables.min.css'
 import 'bootstrap-icons/font/bootstrap-icons.css'
-
+import './assets/form-style.css'
 
 const app = createApp(App)
 

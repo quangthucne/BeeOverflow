@@ -1,10 +1,12 @@
 package com.beeoverflow.apibeeoverflow.service;
 
 import com.beeoverflow.apibeeoverflow.beans.QuestionBean;
+import com.beeoverflow.apibeeoverflow.beans.TagBean;
 import com.beeoverflow.apibeeoverflow.dto.QuestionDTO;
 import com.beeoverflow.apibeeoverflow.entities.Account;
 import com.beeoverflow.apibeeoverflow.entities.ImagesQue;
 import com.beeoverflow.apibeeoverflow.entities.Question;
+import com.beeoverflow.apibeeoverflow.entities.Tag;
 import com.beeoverflow.apibeeoverflow.jpas.AccountJPA;
 import com.beeoverflow.apibeeoverflow.jpas.QuestionJPA;
 import com.beeoverflow.apibeeoverflow.mappers.QuestionMapper;
@@ -32,13 +34,20 @@ public class QuestionService {
     QuestionMapper questionMapper;
 
     @Autowired
+    TagService tagService;
+
+    @Autowired
     CookiesUtil cookiesUtil;
 
     public List<QuestionDTO> getQuestions() {
         return questionMapper.questionsToQuestionDTOs(questionJPA.findAll());
     }
 
-    public Question createQuestion(QuestionBean questionBean) {
+    public Question getByQuestion(int id) {
+        return questionJPA.findById(id);
+    }
+
+    public Question createQuestion(QuestionBean questionBean, TagBean tagBean) {
         LocalDateTime now = LocalDateTime.now();
         Map<String, String> cookie = cookiesUtil.getCookie();
         Account account = accountService.getAccountById(Integer.parseInt(cookie.get("accountId")));
@@ -55,6 +64,15 @@ public class QuestionService {
 
         if(questionBean.getImages() != null) {
             imageService.saveImagesQues(questionBean.getImages(), newQues);
+        }
+
+        if (tagBean.getName() != null) {
+            Tag tag = new Tag();
+
+            tag.setName(tagBean.getName());
+            tag.setQuestion(newQues);
+
+            tagService.createTag(tag);
         }
 
 

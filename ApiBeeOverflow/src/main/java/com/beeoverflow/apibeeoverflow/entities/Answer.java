@@ -41,4 +41,11 @@ public class Answer {
     @OneToMany(mappedBy = "ans")
     private Set<AnsVote> ansVotes = new LinkedHashSet<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private Answer parent;
+
+    @OneToMany(mappedBy = "parent")
+    private Set<Answer> answers = new LinkedHashSet<>();
+
 }

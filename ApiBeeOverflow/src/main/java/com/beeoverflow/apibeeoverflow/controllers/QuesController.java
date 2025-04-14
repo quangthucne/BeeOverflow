@@ -2,6 +2,7 @@ package com.beeoverflow.apibeeoverflow.controllers;
 
 import com.beeoverflow.apibeeoverflow.beans.ImageBean;
 import com.beeoverflow.apibeeoverflow.beans.QuestionBean;
+import com.beeoverflow.apibeeoverflow.beans.TagBean;
 import com.beeoverflow.apibeeoverflow.entities.Question;
 import com.beeoverflow.apibeeoverflow.mappers.QuestionMapper;
 import com.beeoverflow.apibeeoverflow.response.Response;
@@ -34,7 +35,7 @@ public class QuesController {
     }
 
     @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Response> addQuestion(@Valid QuestionBean questionBean, Errors errors) {
+    public ResponseEntity<Response> addQuestion(@Valid QuestionBean questionBean, @Valid TagBean tagBean, Errors errors) {
 
         Response response = new Response();
         if (errors.hasErrors()) {
@@ -44,7 +45,7 @@ public class QuesController {
             return ResponseEntity.ok(response);
         }
         else {
-            Question newQues = questionService.createQuestion(questionBean);
+            Question newQues = questionService.createQuestion(questionBean, tagBean);
             response.setMessage("Success");
             response.setStatus(1);
             response.setData(newQues);

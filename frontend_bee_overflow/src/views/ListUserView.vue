@@ -1,18 +1,20 @@
 <script setup>
-import InDex from '@/components/User/InDex.vue'
+import ListUser from '@/components/User/ListUser.vue';
 import HeaDer from '@/components/User/HeaDer.vue';
 import FooTer from '@/components/User/FooTer.vue';
 </script>
 
 <template>
-  <header>
+
+<header>
     <HeaDer />
 </header>
-  <main>
-    <InDex />
-  </main>
 
-  <footer>
+<main>
+  <ListUser />
+</main>
+
+<footer>
     <FooTer />
 </footer>
 

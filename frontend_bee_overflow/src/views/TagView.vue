@@ -1,18 +1,21 @@
 <script setup>
-import InDex from '@/components/User/InDex.vue'
+import TaG from '@/components/User/TaG.vue';
 import HeaDer from '@/components/User/HeaDer.vue';
 import FooTer from '@/components/User/FooTer.vue';
 </script>
 
 <template>
-  <header>
+
+
+<header>
     <HeaDer />
 </header>
-  <main>
-    <InDex />
-  </main>
 
-  <footer>
+  <main>
+<TaG />
+</main>
+
+<footer>
     <FooTer />
 </footer>
 

@@ -48,8 +48,9 @@ public class Question {
     @Column(name = "is_check")
     private Boolean isCheck;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "ques", fetch = FetchType.LAZY)
-    private Set<Answer> answers = new LinkedHashSet<>();
+    private List<Answer> answers;
 
     @OneToMany(mappedBy = "ques", fetch = FetchType.LAZY)
     private Set<QuestionVote> questionVotes = new LinkedHashSet<>();

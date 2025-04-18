@@ -60,8 +60,9 @@ public class Account {
     @Column(name = "role", length = 50)
     private Integer role;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "account")
-    private Set<Answer> answers = new LinkedHashSet<>();
+    private List<Answer> answers;
 
     @OneToMany(mappedBy = "account")
     private Set<Document> documents = new LinkedHashSet<>();

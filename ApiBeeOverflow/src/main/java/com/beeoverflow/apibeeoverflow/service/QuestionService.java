@@ -64,7 +64,7 @@ public class QuestionService {
 
         if(questionBean.getImages() != null) {
             System.out.println(imageService.saveImage(questionBean.getImages().getFirst()));
-            imageService.saveImagesQues(questionBean.getImages(), newQues);
+            imageService.saveImages(questionBean.getImages(), newQues);
         }
 
         if (tagBean.getName() != null) {
@@ -97,7 +97,7 @@ public class QuestionService {
 
         if(questionBean.getImages() != null) {
             imageService.deleteImagesQues(question.getImagesQues());
-            imageService.saveImagesQues(questionBean.getImages(), newQues);
+            imageService.saveImages(questionBean.getImages(), newQues);
         }
 
         return newQues;
@@ -114,4 +114,6 @@ public class QuestionService {
             return null;
         }
     }
+
+
 }

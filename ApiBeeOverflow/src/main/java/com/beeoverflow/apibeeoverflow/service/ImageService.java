@@ -1,7 +1,10 @@
 package com.beeoverflow.apibeeoverflow.service;
 
+import com.beeoverflow.apibeeoverflow.entities.Answer;
+import com.beeoverflow.apibeeoverflow.entities.ImagesAn;
 import com.beeoverflow.apibeeoverflow.entities.ImagesQue;
 import com.beeoverflow.apibeeoverflow.entities.Question;
+import com.beeoverflow.apibeeoverflow.jpas.ImagesAnsJPA;
 import com.beeoverflow.apibeeoverflow.jpas.ImagesQuesJPA;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
@@ -28,6 +31,9 @@ public class ImageService {
     @Autowired
     Cloudinary cloudinary;
 
+    @Autowired
+    ImagesAnsJPA imagesAnsJPA;
+
     public String saveAvatar(MultipartFile file) {
         try {
             String url = saveImage(file);
@@ -38,7 +44,8 @@ public class ImageService {
         return null;
     }
 
-    public void saveImagesQues (List<MultipartFile> files, Question question) {
+
+    public void saveImages (List<MultipartFile> files, Question question) {
         try {
             for (MultipartFile file : files) {
                 ImagesQue imagesQue = new ImagesQue();
@@ -56,6 +63,26 @@ public class ImageService {
             throw new RuntimeException(e);
         }
     }
+
+    public void saveImagesAns (List<MultipartFile> files, Answer answer) {
+        try {
+            for (MultipartFile file : files) {
+                ImagesAn imagesAn = new ImagesAn();
+                imagesAn.setAns(answer);
+
+                String url = saveImage(file);
+
+                System.out.println(url);
+
+                imagesAn.setName(url);
+                imagesAnsJPA.save(imagesAn);
+
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     public boolean deleteImage(String imageName) {
         String path = "images/questions/" + imageName;

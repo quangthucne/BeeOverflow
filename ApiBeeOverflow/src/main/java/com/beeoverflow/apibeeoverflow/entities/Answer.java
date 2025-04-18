@@ -1,11 +1,14 @@
 package com.beeoverflow.apibeeoverflow.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -20,15 +23,13 @@ public class Answer {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
+    @JsonBackReference
     private Account account;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ques_id")
     private Question ques;
-
-    @Lob
-    @Column(name = "content")
-    private String content;
 
     @Lob
     @Column(name = "detail")
@@ -43,9 +44,15 @@ public class Answer {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
+    @JsonBackReference
     private Answer parent;
 
     @OneToMany(mappedBy = "parent")
-    private Set<Answer> answers = new LinkedHashSet<>();
+    @JsonManagedReference
+    private List<Answer> answers;
+
+    @OneToMany(mappedBy = "ans")
+    @JsonManagedReference
+    private List<ImagesAn> imagesAns;
 
 }

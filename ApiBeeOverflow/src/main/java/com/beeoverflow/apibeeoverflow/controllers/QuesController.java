@@ -1,17 +1,16 @@
 package com.beeoverflow.apibeeoverflow.controllers;
 
-import com.beeoverflow.apibeeoverflow.beans.ImageBean;
 import com.beeoverflow.apibeeoverflow.beans.QuestionBean;
 import com.beeoverflow.apibeeoverflow.beans.TagBean;
+import com.beeoverflow.apibeeoverflow.dto.QuestionDTO;
 import com.beeoverflow.apibeeoverflow.entities.Question;
 import com.beeoverflow.apibeeoverflow.mappers.QuestionMapper;
 import com.beeoverflow.apibeeoverflow.response.Response;
-import com.beeoverflow.apibeeoverflow.service.QuestionService;
+import com.beeoverflow.apibeeoverflow.services.QuestionService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 @CrossOrigin("*")
@@ -45,7 +44,7 @@ public class QuesController {
             return ResponseEntity.ok(response);
         }
         else {
-            Question newQues = questionService.createQuestion(questionBean, tagBean);
+            QuestionDTO newQues = questionService.createQuestion(questionBean, tagBean);
             response.setMessage("Success");
             response.setStatus(1);
             response.setData(newQues);

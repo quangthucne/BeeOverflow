@@ -55,10 +55,39 @@ public class Account {
     @Column(name = "isActive")
     private Boolean isActive;
 
+    public enum Role {
+        ADMIN(0),
+        USER(1),
+        USER_HIGH_LV(2);
+
+        private final int value;
+
+        Role(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public static Role fromValue(int value) {
+            for (Role role : Role.values()) {
+                if (role.getValue() == value) {
+                    return role;
+                }
+            }
+            throw new IllegalArgumentException("Invalid role value: " + value);
+        }
+    }
+
     @Min(0)
     @Max(2)
     @Column(name = "role", length = 50)
     private Integer role;
+
+    public Role getRole() {
+        return Role.fromValue(this.role);
+    }
 
     @JsonManagedReference
     @OneToMany(mappedBy = "account")

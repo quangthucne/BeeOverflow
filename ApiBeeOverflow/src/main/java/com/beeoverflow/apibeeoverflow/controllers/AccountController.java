@@ -3,14 +3,12 @@ package com.beeoverflow.apibeeoverflow.controllers;
 import com.beeoverflow.apibeeoverflow.beans.AccountBean;
 import com.beeoverflow.apibeeoverflow.entities.Account;
 import com.beeoverflow.apibeeoverflow.response.Response;
-import com.beeoverflow.apibeeoverflow.service.AccountService;
 import com.beeoverflow.apibeeoverflow.service.ImageService;
+import com.beeoverflow.apibeeoverflow.services.AccountService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 

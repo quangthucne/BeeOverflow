@@ -1,4 +1,4 @@
-package com.beeoverflow.apibeeoverflow.service;
+package com.beeoverflow.apibeeoverflow.services;
 
 
 import com.beeoverflow.apibeeoverflow.beans.AccountBean;
@@ -6,16 +6,24 @@ import com.beeoverflow.apibeeoverflow.dto.AccountDTO;
 import com.beeoverflow.apibeeoverflow.entities.Account;
 import com.beeoverflow.apibeeoverflow.jpas.AccountJPA;
 import com.beeoverflow.apibeeoverflow.mappers.AccountMapper;
+import com.beeoverflow.apibeeoverflow.service.ImageService;
 import com.beeoverflow.apibeeoverflow.utils.CookiesUtil;
 import com.beeoverflow.apibeeoverflow.utils.PasswordHashing;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public class AccountService {
-    private final PasswordHashing passwordHashing = new PasswordHashing();
+
+    @Autowired
+    PasswordHashing passwordHashing;
 
     @Autowired
     AccountJPA accountJPA;
@@ -29,12 +37,15 @@ public class AccountService {
     @Autowired
     CookiesUtil cookiesUtil;
 
+    @Autowired
+    AuthenticationManager authenticationManager;
+
     public List<AccountDTO> getAccounts() {
         return accountMapper.accountsToAccountDTOs(accountJPA.findAll());
     }
 
     public Account getAccountByUsername(String username) {
-        return accountJPA.findByUsername(username);
+        return accountJPA.findByUsername(username).get();
     }
 
     public Account getAccountById(int accountId) {
@@ -73,22 +84,23 @@ public class AccountService {
     }
 
     public String verifyAccount(AccountBean accountBean) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(accountBean.getUsername(), accountBean.getPassword())
+            );
 
-        Account accountLogin = accountJPA.findByUsername(accountBean.getUsername());
+            Account account = accountJPA.getByUsername(accountBean.getUsername());
 
-        PasswordHashing passwordHashing = new PasswordHashing();
-//        String password = passwordHashing.passwordHash(accountBean.getPassword());
+            // Cast principal to UserDetails if needed
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-        if (accountLogin != null) {
-            if (passwordHashing.verifyPassword(accountBean.getPassword(), accountLogin.getPassword())) {
-                cookiesUtil.setCookie(accountLogin.getId(), accountLogin.getRole());
-                return "success";
-            } else {
-                return  "username or password incorrect";
-            }
-        }
-        else {
-            return "account not found";
+            // Generate JWT token
+            String token = cookiesUtil.setToken(userDetails.getUsername(), String.valueOf(account.getId()),  authentication.getAuthorities().iterator().next().getAuthority()); // Or add role info here
+
+            return token;
+
+        } catch (AuthenticationException e) {
+            return "username or password incorrect";
         }
 
     }

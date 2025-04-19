@@ -1,11 +1,10 @@
-package com.beeoverflow.apibeeoverflow.service;
+package com.beeoverflow.apibeeoverflow.services;
 
 import com.beeoverflow.apibeeoverflow.beans.AnswerBean;
 import com.beeoverflow.apibeeoverflow.entities.Account;
 import com.beeoverflow.apibeeoverflow.entities.Answer;
 import com.beeoverflow.apibeeoverflow.entities.Question;
-import com.beeoverflow.apibeeoverflow.entities.Tag;
-import com.beeoverflow.apibeeoverflow.jpas.AccountJPA;
+import com.beeoverflow.apibeeoverflow.service.ImageService;
 import com.beeoverflow.apibeeoverflow.utils.CookiesUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

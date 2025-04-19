@@ -1,7 +1,5 @@
-package com.beeoverflow.apibeeoverflow.service;
+package com.beeoverflow.apibeeoverflow.services;
 
-import com.beeoverflow.apibeeoverflow.beans.TagBean;
-import com.beeoverflow.apibeeoverflow.entities.Question;
 import com.beeoverflow.apibeeoverflow.entities.Tag;
 import com.beeoverflow.apibeeoverflow.jpas.TagJPA;
 import org.springframework.beans.factory.annotation.Autowired;

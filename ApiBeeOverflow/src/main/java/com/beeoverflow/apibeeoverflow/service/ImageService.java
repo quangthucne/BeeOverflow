@@ -1,5 +1,6 @@
 package com.beeoverflow.apibeeoverflow.service;
 
+import com.beeoverflow.apibeeoverflow.dto.QuestionDTO;
 import com.beeoverflow.apibeeoverflow.entities.Answer;
 import com.beeoverflow.apibeeoverflow.entities.ImagesAn;
 import com.beeoverflow.apibeeoverflow.entities.ImagesQue;
@@ -7,6 +8,7 @@ import com.beeoverflow.apibeeoverflow.entities.Question;
 import com.beeoverflow.apibeeoverflow.jpas.ImagesAnsJPA;
 import com.beeoverflow.apibeeoverflow.jpas.ImagesQuesJPA;
 import com.cloudinary.Cloudinary;
+import com.cloudinary.Transformation;
 import com.cloudinary.utils.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -104,16 +106,22 @@ public class ImageService {
 
     public String saveImage(MultipartFile file) {
         try {
-            Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
-                    ObjectUtils.asMap("folder", "images")); // Optional: folder name in Cloudinary
+            Map<String, Object> uploadParams = Map.of(
+                    "folder", "images",
+                    "transformation", new Transformation()
+                            .fetchFormat("auto")     // auto chọn định dạng tối ưu
+                            .quality("auto:eco")     // nén nhưng vẫn giữ chất lượng khá tốt
+            );
 
-            String imageUrl = (String) uploadResult.get("secure_url");
+            Map uploadResult = cloudinary.uploader().upload(file.getBytes(), uploadParams);
 
-            return imageUrl;
+            return (String) uploadResult.get("secure_url");
 
         } catch (IOException e) {
-            return e.getMessage();
+            e.printStackTrace();
+            return null;
         }
     }
+
 
 }

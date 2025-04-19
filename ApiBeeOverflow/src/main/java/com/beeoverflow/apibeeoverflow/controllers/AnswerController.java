@@ -2,7 +2,7 @@ package com.beeoverflow.apibeeoverflow.controllers;
 
 import com.beeoverflow.apibeeoverflow.beans.AnswerBean;
 import com.beeoverflow.apibeeoverflow.response.Response;
-import com.beeoverflow.apibeeoverflow.service.AnswerService;
+import com.beeoverflow.apibeeoverflow.services.AnswerService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -58,6 +58,6 @@ public class AnswerController {
             answerService.delete(id);
             response.setData(null);
             return ResponseEntity.ok(response);
-        
+
     }
 }

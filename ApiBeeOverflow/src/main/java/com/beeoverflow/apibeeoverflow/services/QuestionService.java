@@ -1,16 +1,16 @@
-package com.beeoverflow.apibeeoverflow.service;
+package com.beeoverflow.apibeeoverflow.services;
 
 import com.beeoverflow.apibeeoverflow.beans.QuestionBean;
 import com.beeoverflow.apibeeoverflow.beans.TagBean;
 import com.beeoverflow.apibeeoverflow.dto.QuestionDTO;
 import com.beeoverflow.apibeeoverflow.entities.Account;
-import com.beeoverflow.apibeeoverflow.entities.ImagesQue;
 import com.beeoverflow.apibeeoverflow.entities.Question;
 import com.beeoverflow.apibeeoverflow.entities.Tag;
-import com.beeoverflow.apibeeoverflow.jpas.AccountJPA;
 import com.beeoverflow.apibeeoverflow.jpas.QuestionJPA;
 import com.beeoverflow.apibeeoverflow.mappers.QuestionMapper;
+import com.beeoverflow.apibeeoverflow.service.ImageService;
 import com.beeoverflow.apibeeoverflow.utils.CookiesUtil;
+import com.beeoverflow.apibeeoverflow.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +37,9 @@ public class QuestionService {
     TagService tagService;
 
     @Autowired
+    JwtUtil jwtUtil;
+
+    @Autowired
     CookiesUtil cookiesUtil;
 
     public List<QuestionDTO> getQuestions() {
@@ -47,10 +50,9 @@ public class QuestionService {
         return questionJPA.findById(id);
     }
 
-    public Question createQuestion(QuestionBean questionBean, TagBean tagBean) {
+    public QuestionDTO createQuestion(QuestionBean questionBean, TagBean tagBean) {
         LocalDateTime now = LocalDateTime.now();
-        Map<String, String> cookie = cookiesUtil.getCookie();
-        Account account = accountService.getAccountById(Integer.parseInt(cookie.get("accountId")));
+        Account account = accountService.getAccountById(jwtUtil.extractUserId(cookiesUtil.getToken()));
         Question question = new Question();
 
         question.setAccount(account);
@@ -77,16 +79,17 @@ public class QuestionService {
         }
 
 
-        return newQues;
+        return questionMapper.questionToQuestionDTO(newQues);
     }
 
     public Question updateQuestion(QuestionBean questionBean) {
         LocalDateTime now = LocalDateTime.now();
         Question question = questionJPA.findById(questionBean.getId());
+        Account account = accountService.getAccountById(jwtUtil.extractUserId(cookiesUtil.getToken()));
 
         System.out.println("question id: " + questionBean.getId());
 
-        question.setAccount(accountService.getAccountById(questionBean.getAccountId()));
+        question.setAccount(account);
         question.setTitle(questionBean.getTitle());
         question.setDetail(questionBean.getDetail());
         question.setCreatedDate(now);

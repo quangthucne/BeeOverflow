@@ -1,10 +1,13 @@
 package com.beeoverflow.apibeeoverflow.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import java.math.BigDecimal;
 import java.util.LinkedHashSet;
@@ -33,13 +36,18 @@ public class DocumentDetail {
     private String docSrc;
 
     @Column(name = "price", precision = 10, scale = 2)
-    private BigDecimal price;
+    private int price;
 
     @ColumnDefault("0")
     @Column(name = "isDeleted")
     private Boolean isDeleted;
 
     @OneToMany(mappedBy = "docDetail")
+    @JsonBackReference
     private Set<Document> documents = new LinkedHashSet<>();
+
+    @NotNull
+    @Column(name = "is_free", nullable = false)
+    private boolean isFree = false;
 
 }

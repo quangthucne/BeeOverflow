@@ -1,8 +1,22 @@
 <script setup>
 import UploadImage from '@/components/User/UploadImage.vue'
+import PdfUploader from '@/components/User/PdfUploader.vue'
+import PdfFrame from '@/components/User/PdfFrame.vue'
 </script>
 <template>
+  <header>
+    <PdfUploader />
+  </header>
   <main>
-    <UploadImage />
+    <section>
+      <PdfFrame
+        pdfUrl="https://qwomlwcudldjsbtceasu.supabase.co/storage/v1/object/public/pdf-bucket/public/pdfs/tjth8tgchb.pdf"
+        :initialPage="1"
+        :initialScale="1.2"
+      />
+    </section>
+    <section>
+      <UploadImage />
+    </section>
   </main>
 </template>

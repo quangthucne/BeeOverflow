@@ -35,7 +35,7 @@ public class AnswerBean {
     @NotBlank
     private String detail;
 
-    private List<MultipartFile> images;
+    private List<String> images;
 
     private Boolean isDeleted;
 

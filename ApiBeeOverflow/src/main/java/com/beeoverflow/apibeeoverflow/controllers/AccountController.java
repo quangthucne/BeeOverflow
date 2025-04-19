@@ -3,7 +3,7 @@ package com.beeoverflow.apibeeoverflow.controllers;
 import com.beeoverflow.apibeeoverflow.beans.AccountBean;
 import com.beeoverflow.apibeeoverflow.entities.Account;
 import com.beeoverflow.apibeeoverflow.response.Response;
-import com.beeoverflow.apibeeoverflow.service.ImageService;
+import com.beeoverflow.apibeeoverflow.services.ImageService;
 import com.beeoverflow.apibeeoverflow.services.AccountService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

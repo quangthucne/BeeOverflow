@@ -23,7 +23,7 @@ public class QuestionBean {
     @NotBlank
     private String detail;
 
-    private List<MultipartFile> images;
+    private List<String> images;
 
     private boolean isCheck;
 

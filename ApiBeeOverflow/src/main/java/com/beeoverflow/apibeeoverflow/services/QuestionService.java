@@ -8,7 +8,6 @@ import com.beeoverflow.apibeeoverflow.entities.Question;
 import com.beeoverflow.apibeeoverflow.entities.Tag;
 import com.beeoverflow.apibeeoverflow.jpas.QuestionJPA;
 import com.beeoverflow.apibeeoverflow.mappers.QuestionMapper;
-import com.beeoverflow.apibeeoverflow.service.ImageService;
 import com.beeoverflow.apibeeoverflow.utils.CookiesUtil;
 import com.beeoverflow.apibeeoverflow.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class QuestionService {
@@ -65,7 +63,6 @@ public class QuestionService {
         Question newQues = questionJPA.save(question);
 
         if(questionBean.getImages() != null) {
-            System.out.println(imageService.saveImage(questionBean.getImages().getFirst()));
             imageService.saveImages(questionBean.getImages(), newQues);
         }
 

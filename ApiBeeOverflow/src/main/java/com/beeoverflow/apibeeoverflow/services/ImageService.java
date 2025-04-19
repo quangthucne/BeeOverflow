@@ -1,6 +1,5 @@
-package com.beeoverflow.apibeeoverflow.service;
+package com.beeoverflow.apibeeoverflow.services;
 
-import com.beeoverflow.apibeeoverflow.dto.QuestionDTO;
 import com.beeoverflow.apibeeoverflow.entities.Answer;
 import com.beeoverflow.apibeeoverflow.entities.ImagesAn;
 import com.beeoverflow.apibeeoverflow.entities.ImagesQue;
@@ -9,18 +8,12 @@ import com.beeoverflow.apibeeoverflow.jpas.ImagesAnsJPA;
 import com.beeoverflow.apibeeoverflow.jpas.ImagesQuesJPA;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.Transformation;
-import com.cloudinary.utils.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -47,17 +40,15 @@ public class ImageService {
     }
 
 
-    public void saveImages (List<MultipartFile> files, Question question) {
+    public void saveImages (List<String> images, Question question) {
         try {
-            for (MultipartFile file : files) {
+            for (String imgUrl: images) {
                 ImagesQue imagesQue = new ImagesQue();
                 imagesQue.setQues(question);
 
-                String url = saveImage(file);
+                System.out.println(imgUrl);
 
-                System.out.println(url);
-
-                imagesQue.setName(url);
+                imagesQue.setName(imgUrl);
                 imagesQuesJPA.save(imagesQue);
 
             }
@@ -66,17 +57,14 @@ public class ImageService {
         }
     }
 
-    public void saveImagesAns (List<MultipartFile> files, Answer answer) {
+    public void saveImagesAns (List<String> images, Answer answer) {
         try {
-            for (MultipartFile file : files) {
+            for (String imgUrl: images) {
                 ImagesAn imagesAn = new ImagesAn();
                 imagesAn.setAns(answer);
+                System.out.println(imgUrl);
 
-                String url = saveImage(file);
-
-                System.out.println(url);
-
-                imagesAn.setName(url);
+                imagesAn.setName(imgUrl);
                 imagesAnsJPA.save(imagesAn);
 
             }

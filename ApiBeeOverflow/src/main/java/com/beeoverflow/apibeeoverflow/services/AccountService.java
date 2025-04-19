@@ -6,7 +6,6 @@ import com.beeoverflow.apibeeoverflow.dto.AccountDTO;
 import com.beeoverflow.apibeeoverflow.entities.Account;
 import com.beeoverflow.apibeeoverflow.jpas.AccountJPA;
 import com.beeoverflow.apibeeoverflow.mappers.AccountMapper;
-import com.beeoverflow.apibeeoverflow.service.ImageService;
 import com.beeoverflow.apibeeoverflow.utils.CookiesUtil;
 import com.beeoverflow.apibeeoverflow.utils.PasswordHashing;
 import org.springframework.beans.factory.annotation.Autowired;

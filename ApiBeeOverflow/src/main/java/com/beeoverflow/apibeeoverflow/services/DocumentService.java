@@ -2,6 +2,8 @@ package com.beeoverflow.apibeeoverflow.services;
 
 import java.util.List;
 
+import javax.print.Doc;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +28,10 @@ public class DocumentService {
 
     public List<DocumentDetail> getAllDoc () {
         return documentDetailJPA.findAll();
+    }
+
+    public Document getDocById(int id){
+        return documentJPA.findById(id).get();
     }
 
     public DocumentDetail createDoc(DocumentBean documentBean){

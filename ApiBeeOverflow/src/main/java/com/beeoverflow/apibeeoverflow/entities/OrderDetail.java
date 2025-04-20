@@ -7,6 +7,7 @@ import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -27,10 +28,10 @@ public class OrderDetail {
     private Document doc;
 
     @Column(name = "price", precision = 10, scale = 2)
-    private BigDecimal price;
+    private int price;
 
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_date")
-    private Instant createdDate;
+    private LocalDateTime createdDate;
 
 }

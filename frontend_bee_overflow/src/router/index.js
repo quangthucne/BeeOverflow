@@ -9,6 +9,10 @@ import LoginView from '@/views/LoginView.vue'
 import RegisterView from '@/views/RegisterView.vue'
 import QuestionInputView from '@/views/QuestionInputView.vue'
 import UploadImageView from '@/views/UploadImageView.vue'
+import BlackListView from '@/views/AdminViews/BlackListView.vue'
+import CheckQuestionView from '@/views/AdminViews/CheckQuestionView.vue'
+import DocumentAdminView from '@/views/AdminViews/DocumentAdminView.vue'
+import StatisticsTableView from '@/views/AdminViews/StatisticsTableView.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -61,6 +65,26 @@ const router = createRouter({
       path: '/upload',
       name: 'upload',
       component: UploadImageView,
+    },
+    {
+      path: '/blacklist',
+      name: 'blacklist',
+      component: BlackListView,
+    },
+    {
+      path: '/checkquestion',
+      name: 'checkquestion',
+      component: CheckQuestionView,
+    },
+    {
+      path: '/documentadmin',
+      name: 'documentadmin',
+      component: DocumentAdminView,
+    },
+    {
+      path: '/statisticstable',
+      name: 'statisticstable',
+      component: StatisticsTableView,
     },
   ],
 })

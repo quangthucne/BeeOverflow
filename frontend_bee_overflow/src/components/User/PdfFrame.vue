@@ -35,9 +35,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import * as pdfjsLib from 'pdfjs-dist/build/pdf'
-// import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.js?url'
-
-// pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker
 
 const props = defineProps({
   pdfUrl: {

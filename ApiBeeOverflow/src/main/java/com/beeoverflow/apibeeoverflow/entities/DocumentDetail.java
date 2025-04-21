@@ -48,6 +48,6 @@ public class DocumentDetail {
 
     @NotNull
     @Column(name = "is_free", nullable = false)
-    private boolean isFree = false;
+    private boolean isFree;
 
 }

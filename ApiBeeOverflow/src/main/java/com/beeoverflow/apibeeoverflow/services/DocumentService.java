@@ -49,7 +49,7 @@ public class DocumentService {
         
         DocumentDetail saveDocDetail = documentDetailJPA.save(docDetail);
 
-        doc.setAccount(accountService.getAccountById(6));
+        doc.setAccount(accountService.getAccountById(1));
         doc.setDocDetail(saveDocDetail);
 
         documentJPA.save(doc);
@@ -59,7 +59,7 @@ public class DocumentService {
 
     public DocumentDetail update(DocumentBean documentBean) {
         DocumentDetail docDetail = documentDetailJPA.findById(documentBean.getId());
-
+        System.out.println("isfree: "+docDetail.isFree());
         docDetail.setNameDoc(documentBean.getName());
         docDetail.setDescription(documentBean.getDescription());
         docDetail.setDocSrc(documentBean.getDocUrl());

@@ -15,6 +15,7 @@ import StatisticsTableView from '@/views/AdminViews/StatisticsTableView.vue'
 import UserBlackListView from '@/views/AdminViews/UserBlackListView.vue'
 import QuestionBlackListView from '@/views/AdminViews/QuestionBlackListView.vue'
 import QuestionDetailView from '@/views/QuestionDetailView.vue'
+import DocComponentView from '@/views/DocComponentView.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -102,6 +103,11 @@ const router = createRouter({
       path: '/question/detail/:id',
       name: 'questionDetail',
       component: QuestionDetailView,
+    },
+    {
+      path: '/doc',
+      name: 'doc',
+      component: DocComponentView,
     },
   ],
 })

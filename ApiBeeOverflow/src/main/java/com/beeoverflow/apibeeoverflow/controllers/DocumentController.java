@@ -30,6 +30,9 @@ public class DocumentController {
     @GetMapping("")
     public ResponseEntity<Response> getDocument() {
         Response response = new Response();
+        response.setMessage("Danh sách tài liệu");
+        response.setStatus(1);
+        response.setData(documentService.getAllDoc());
         return ResponseEntity.ok(response);
     }
 

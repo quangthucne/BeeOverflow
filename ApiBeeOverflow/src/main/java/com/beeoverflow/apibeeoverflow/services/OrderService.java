@@ -37,6 +37,7 @@ public class OrderService {
 
     public OrderDetail createOrder (OrderBean orderBean) {
         LocalDateTime now = LocalDateTime.now();
+        System.out.println("Account Id: " + jwtUtil.extractUserId(cookiesUtil.getToken()));
         int accountId = jwtUtil.extractUserId(cookiesUtil.getToken());
         Document doc = documentService.getDocById(orderBean.getDocId());
         OrderDetail orderDetail = new OrderDetail();

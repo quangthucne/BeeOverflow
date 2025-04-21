@@ -94,9 +94,11 @@ public class Account {
     private List<Answer> answers;
 
     @OneToMany(mappedBy = "account")
+    @JsonManagedReference
     private Set<Document> documents = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "account")
+    @JsonManagedReference
     private Set<Order> orders = new LinkedHashSet<>();
 
     @JsonBackReference

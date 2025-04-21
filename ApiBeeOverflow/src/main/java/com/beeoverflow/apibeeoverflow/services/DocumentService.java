@@ -34,6 +34,8 @@ public class DocumentService {
         return documentJPA.findById(id).get();
     }
 
+    // public DocumentDetail getDocDetailById
+
     public DocumentDetail createDoc(DocumentBean documentBean){
         Document doc = new Document();
         DocumentDetail docDetail = new DocumentDetail();

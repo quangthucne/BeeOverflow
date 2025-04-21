@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
+
 @CrossOrigin("*")
 @RestController
 @RequestMapping("/question")
@@ -33,8 +34,31 @@ public class QuesController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Response> getQuestionById(@PathVariable int id) {
+        Response response = new Response();
+        try {
+            Question question = questionService.getByQuestion(id);
+            if (question != null) {
+                response.setData(question);
+                response.setMessage("Success");
+                response.setStatus(1);
+            } else {
+                response.setData(null);
+                response.setMessage("Question not found");
+                response.setStatus(0);
+            }
+        } catch (Exception e) {
+            response.setData(null);
+            response.setMessage("Error retrieving question: " + e.getMessage());
+            response.setStatus(0);
+        }
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Response> addQuestion(@Valid QuestionBean questionBean, @Valid TagBean tagBean, Errors errors) {
+    public ResponseEntity<Response> addQuestion(@Valid QuestionBean questionBean, @Valid TagBean tagBean,
+            Errors errors) {
 
         Response response = new Response();
         if (errors.hasErrors()) {
@@ -42,8 +66,7 @@ public class QuesController {
             response.setStatus(1);
             response.setData(null);
             return ResponseEntity.ok(response);
-        }
-        else {
+        } else {
             QuestionDTO newQues = questionService.createQuestion(questionBean, tagBean);
             response.setMessage("Success");
             response.setStatus(1);
@@ -66,7 +89,7 @@ public class QuesController {
     public ResponseEntity<Response> deleteQuestion(@Valid QuestionBean questionBean, Errors errors) {
         Response response = new Response();
         Question delQues = questionService.deleteQuestion(questionBean);
-        response.setMessage(delQues.getIsDeleted()?"Success":"Failed");
+        response.setMessage(delQues.getIsDeleted() ? "Success" : "Failed");
         response.setStatus(1);
         response.setData(delQues);
         return ResponseEntity.ok(response);

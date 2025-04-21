@@ -17,29 +17,29 @@ public class AccountBean {
 
     private Integer id;
 
-    @NotBlank
+    @NotBlank(message = "Tên đăng nhập không được bỏ trống")
     private String username;
 
-    @NotBlank
+    @NotBlank(message = "Họ và tên không được bỏ tống")
     private String fullname;
 
-    @NotBlank
+    @NotBlank(message = "Email không được bỏ trống")
     private String email;
 
 
     private String avatar;
 
-    @NotBlank
+    @NotBlank(message = "Số điện thoại không được bỏ trống")
     private String phone;
 
-    @NotBlank
+    @NotBlank(message = "Mật khẩu không được bỏ trống")
     private String password;
 
     private int gender;
 
     private Boolean isActive;
 
-    private MultipartFile avatarFile;
+    private String avatarFile;
 
 
 }

@@ -8,6 +8,7 @@ import lombok.Setter;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Getter
@@ -26,11 +27,13 @@ public class Document {
     private DocumentDetail docDetail;
 
     @OneToMany(mappedBy = "doc")
+    @JsonBackReference
     private Set<OrderDetail> orderDetails = new LinkedHashSet<>();
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "account_id", nullable = false)
+    @JsonBackReference
     private Account account;
 
 }

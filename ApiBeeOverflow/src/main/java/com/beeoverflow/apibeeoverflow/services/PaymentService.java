@@ -24,7 +24,7 @@ public class PaymentService {
         LocalDateTime dateTime = LocalDateTime.parse(returnResultPayment.getVnp_PayDate(), formatter);
         System.out.println("Converted DateTime: " + dateTime);
 
-
+        resultPayment.setVnp_ResponseCode(returnResultPayment.getVnp_ResponseCode());
         resultPayment.setDateTime(dateTime);
         resultPayment.setVnp_Amount(returnResultPayment.getVnp_Amount());
         resultPayment.setVnp_TxnRef(returnResultPayment.getVnp_TxnRef());
@@ -38,7 +38,7 @@ public class PaymentService {
         return resultPayment;
     }
 
-    public String getStatus (ResultPaymentBean returnResultPayment) {
+    public String getStatus(ResultPaymentBean returnResultPayment) {
         String returnCode = returnResultPayment.getVnp_ResponseCode();
         System.out.println("Return Code: " + returnCode);
         String status = "";

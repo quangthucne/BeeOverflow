@@ -47,11 +47,11 @@ public class AccountController {
 
         Response response = new Response();
 
-        String message = accountService.verifyAccount(accountBean);
+        String token = accountService.verifyAccount(accountBean);
 
         response.setStatus(1);
-        response.setMessage(message);
-        response.setData(accountBean);
+        response.setMessage("Đăng nhập thành công");
+        response.setData(token);
 
         return ResponseEntity.ok(response);
     }

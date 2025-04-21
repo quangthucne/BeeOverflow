@@ -15,6 +15,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
 
+import javax.servlet.http.Cookie;
+
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
 
@@ -25,7 +27,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
         final String authorizationHeader = request.getHeader("Authorization");
 
         String username = null;
@@ -36,17 +39,28 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             return;
         }
 
+        if (request.getRequestURI().equals("/account/register")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        if (request.getMethod().equals("OPTIONS")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            jwt = authorizationHeader.substring(7);
-            username = jwtUtil.extractUsername(jwt);
+            String token = authorizationHeader.substring(7);
+            jwt = token;
+            username = jwtUtil.extractUsername(token);
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             String role = jwtUtil.extractRole(jwt);
 
             // Create authentication token
-            UsernamePasswordAuthenticationToken authenticationToken =
-                    new UsernamePasswordAuthenticationToken(username, null, List.of(new SimpleGrantedAuthority(role)));
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username,
+                    null, List.of(new SimpleGrantedAuthority(role)));
 
             authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);

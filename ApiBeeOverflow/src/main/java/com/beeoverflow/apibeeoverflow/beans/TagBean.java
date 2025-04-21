@@ -1,5 +1,7 @@
 package com.beeoverflow.apibeeoverflow.beans;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,6 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TagBean {
     private int id;
-    private String name;
+    private List<String> name;
     private int quesId;
 }

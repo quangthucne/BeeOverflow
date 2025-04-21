@@ -14,7 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class QuestionService {
@@ -41,6 +43,9 @@ public class QuestionService {
     CookiesUtil cookiesUtil;
 
     public List<QuestionDTO> getQuestions() {
+//        List<Question> questions = questionJPA.findAll().stream()
+//                .sorted(Comparator.comparing(Question::getCreatedDate))
+//                .collect(Collectors.toList());
         return questionMapper.questionsToQuestionDTOs(questionJPA.findAll());
     }
 
@@ -50,7 +55,7 @@ public class QuestionService {
 
     public QuestionDTO createQuestion(QuestionBean questionBean, TagBean tagBean) {
         LocalDateTime now = LocalDateTime.now();
-        Account account = accountService.getAccountById(jwtUtil.extractUserId(cookiesUtil.getToken()));
+        Account account = accountService.getAccountById(jwtUtil.extractUserId(jwtUtil.getTokenFromRequest()));
         Question question = new Question();
 
         question.setAccount(account);
@@ -62,19 +67,19 @@ public class QuestionService {
 
         Question newQues = questionJPA.save(question);
 
-        if(questionBean.getImages() != null) {
+        if (questionBean.getImages() != null) {
             imageService.saveImages(questionBean.getImages(), newQues);
         }
 
         if (tagBean.getName() != null) {
-            Tag tag = new Tag();
+            for (String name : tagBean.getName()) {
+                Tag tag = new Tag();
+                tag.setName(name);
+                tag.setQuestion(newQues);
+                tagService.createTag(tag);
+            }
 
-            tag.setName(tagBean.getName());
-            tag.setQuestion(newQues);
-
-            tagService.createTag(tag);
         }
-
 
         return questionMapper.questionToQuestionDTO(newQues);
     }
@@ -95,7 +100,7 @@ public class QuestionService {
 
         Question newQues = questionJPA.save(question);
 
-        if(questionBean.getImages() != null) {
+        if (questionBean.getImages() != null) {
             imageService.deleteImagesQues(question.getImagesQues());
             imageService.saveImages(questionBean.getImages(), newQues);
         }
@@ -114,6 +119,5 @@ public class QuestionService {
             return null;
         }
     }
-
 
 }

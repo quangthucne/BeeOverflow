@@ -2,6 +2,8 @@ package com.beeoverflow.apibeeoverflow.utils;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -10,6 +12,9 @@ import java.util.Date;
 
 @Component
 public class JwtUtil {
+    @Autowired
+    HttpServletRequest request;
+
     private final String SECRET_KEY = "ZDc3MmZkNjctM2UxMi00NzcyLTgxOGEtNTQ3NzFhNjdkZWNj";
     private final SecretKey ENCODE_SECRET_KEY = Keys.hmacShaKeyFor(Base64.getDecoder().decode(SECRET_KEY));
 
@@ -43,5 +48,14 @@ public class JwtUtil {
 
     public int extractUserId(String token) {
         return Integer.parseInt(Jwts.parser().setSigningKey(ENCODE_SECRET_KEY).parseClaimsJws(token).getBody().get("accountId", String.class));
+    }
+
+    public String getTokenFromRequest() {
+        String bearerToken = request.getHeader("Authorization");
+        String token = null;
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            token = bearerToken.substring(7);
+        }
+        return token;
     }
 }

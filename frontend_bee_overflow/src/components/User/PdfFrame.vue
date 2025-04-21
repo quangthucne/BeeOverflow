@@ -15,14 +15,14 @@
     </div>
 
     <!-- Hiển thị PDF -->
-    <div class="canvas-container" ref="container">
+    <!-- <div class="canvas-container" ref="container">
       <canvas
         v-for="page in visiblePages"
         :key="page.pageNumber"
         :ref="(el) => setCanvasRef(el, page.pageNumber - 1)"
         class="pdf-page"
       ></canvas>
-    </div>
+    </div> -->
 
     <!-- Tải trang nền -->
     <div v-if="loading" class="loading">

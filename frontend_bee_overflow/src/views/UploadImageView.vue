@@ -2,6 +2,7 @@
 import UploadImage from '@/components/User/UploadImage.vue'
 import PdfUploader from '@/components/User/PdfUploader.vue'
 import PdfFrame from '@/components/User/PdfFrame.vue'
+import QuestionDetail from '@/components/User/QuestionDetail.vue'
 </script>
 <template>
   <header>
@@ -17,6 +18,10 @@ import PdfFrame from '@/components/User/PdfFrame.vue'
     </section>
     <section>
       <UploadImage />
+    </section>
+
+    <section>
+      <QuestionDetail :questions="questionData" />
     </section>
   </main>
 </template>

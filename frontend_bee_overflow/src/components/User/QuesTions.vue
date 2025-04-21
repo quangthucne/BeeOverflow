@@ -1,9 +1,11 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
+import Cookies from 'js-cookie'
 
 const questions = ref([])
 const maxVisibleImages = 4
+const accountId = ref(null)
 
 function getImageUrl(name) {
   return `${name}`
@@ -13,13 +15,19 @@ function visibleImages(images) {
   return images.slice(0, maxVisibleImages)
 }
 
+function formatDate(date) {
+  return new Date(date).toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
 function getAllQuestions() {
   axios
-    .get('http://localhost:8080/question', {
-      headers: {
-        Cookie: 'accountId=1; role=1',
-      },
-    })
+    .get('http://localhost:8080/question')
     .then((response) => {
       questions.value = response.data.data
     })
@@ -28,7 +36,27 @@ function getAllQuestions() {
     })
 }
 
+function getAccountIdFromToken() {
+  const token = Cookies.get('token')
+  if (!token) return null
+
+  const payload = JSON.parse(atob(token.split('.')[1]))
+  console.log(payload.accountId || payload.id)
+  return payload.accountId || payload.id // tuỳ cấu trúc JWT
+}
+
+function handleEdit(questionId) {
+  console.log('Edit question', questionId)
+  // Add your navigation or modal logic here
+}
+
+function handleDelete(questionId) {
+  console.log('Delete question', questionId)
+  // Add confirmation and API call here
+}
+
 onMounted(() => {
+  accountId.value = getAccountIdFromToken()
   getAllQuestions()
 })
 </script>
@@ -36,75 +64,75 @@ onMounted(() => {
 <template>
   <div class="custom-container mt-4">
     <div class="card p-4 mb-3" v-for="(question, index) in questions" :key="question.id">
-      <h3>{{ question.title }}</h3>
-      <p class="text-muted">
-        Được hỏi bởi <strong v-if="question.account">User #{{ question.account.fullname }}</strong>
-      </p>
-      <p class="lead">
-        {{ question.detail }}
-      </p>
-
-      <!-- Hình ảnh kiểu Facebook -->
-      <div v-if="question.imagesQues && question.imagesQues.length > 0" class="image-grid mt-3">
-        <div
-          v-for="(img, i) in visibleImages(question.imagesQues)"
-          :key="img.id"
-          class="image-wrapper"
-        >
-          <img :src="getImageUrl(img.name)" class="img-thumbnail" alt="Ảnh câu hỏi" />
+      <div class="card mb-4 shadow-sm">
+        <div class="card-body position-relative">
+          <!-- Avatar & Name -->
+          <div class="d-flex align-items-center mb-3">
+            <img
+              :src="question.account.avatar || 'https://via.placeholder.com/50'"
+              alt="Avatar"
+              class="rounded-circle me-3"
+              style="width: 40px; height: 40px"
+            />
+            <div>
+              <h6 class="mb-0">
+                {{ question.account.fullname }} (@{{ question.account.username }})
+              </h6>
+              <small class="text-muted">
+                {{ question.createdDate ? formatDate(question.createdDate) : 'No date available' }}
+              </small>
+            </div>
+          </div>
+          <small v-text="question.account.id"></small>
+          <!-- Dropdown menu -->
           <div
-            v-if="i === maxVisibleImages - 1 && question.imagesQues.length > maxVisibleImages"
-            class="more-overlay"
+            v-if="question.account.id == accountId"
+            class="position-absolute top-0 end-0 m-3 dropdown"
           >
-            +{{ question.imagesQues.length - maxVisibleImages }}
+            <button
+              class="btn btn-light btn-sm dropdown-toggle"
+              type="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            ></button>
+            <ul class="dropdown-menu">
+              <li>
+                <a class="dropdown-item" href="#" @click.prevent="handleEdit(question.id)"
+                  >Chỉnh sửa</a
+                >
+              </li>
+              <li>
+                <a
+                  class="dropdown-item text-danger"
+                  href="#"
+                  @click.prevent="handleDelete(question.id)"
+                  >Xoá</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <h3 class="card-title text-primary mb-3 ms-3">{{ question.title }}</h3>
+          <div class="detail" v-html="question.detail"></div>
+          <div v-if="question.imagesQues.length" class="d-flex flex-wrap gap-2 mt-3 ms-3">
+            <img
+              v-for="image in question.imagesQues"
+              :key="image.id"
+              :src="image.name"
+              alt="Question Image"
+              class="img-fluid rounded"
+              style="width: 500px; height: 500px; object-fit: cover"
+            />
           </div>
         </div>
-      </div>
 
-      <div>
-        <span class="badge bg-secondary">#question</span>
-        <span class="badge bg-warning text-dark" v-if="question.isCheck">Đã duyệt</span>
+        <div v-if="question.tags.length" class="card-footer bg-light">
+          <span class="text-muted">Tags:</span>
+          <span v-for="tag in question.tags" :key="tag.id" class="badge bg-primary text-white ms-2">
+            {{ tag.name }}
+          </span>
+        </div>
       </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-.custom-container {
-  width: 80%;
-  margin: 0 auto;
-}
-
-.image-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 8px;
-}
-
-.image-wrapper {
-  position: relative;
-}
-
-.image-wrapper img {
-  width: 100%;
-  height: auto;
-  object-fit: cover;
-  border-radius: 8px;
-}
-
-.more-overlay {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  color: white;
-  font-weight: bold;
-  font-size: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-}
-</style>

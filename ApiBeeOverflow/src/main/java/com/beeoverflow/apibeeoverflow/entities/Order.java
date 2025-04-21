@@ -7,6 +7,9 @@ import lombok.Setter;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Getter
 @Setter
 @Entity
@@ -19,9 +22,11 @@ public class Order {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
+    @JsonBackReference
     private Account account;
 
     @OneToMany(mappedBy = "order")
+    @JsonManagedReference
     private Set<OrderDetail> orderDetails = new LinkedHashSet<>();
 
 }

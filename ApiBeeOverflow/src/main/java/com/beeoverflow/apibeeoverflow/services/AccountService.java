@@ -68,8 +68,8 @@ public class AccountService {
         account.setRole(1);
 
         // set avatar default if accountBean.getAvatarFile() is null
-        if (accountBean.getAvatarFile() != null) {
-            account.setAvatar(imageService.saveAvatar(accountBean.getAvatarFile()));
+        if (accountBean.getAvatar() != null) {
+            account.setAvatar(accountBean.getAvatar());
         } else {
             String avatar = accountBean.getGender() == 1 ? "avatar_male.jpg" : "avatar_female.jpg";
             account.setAvatar(avatar);

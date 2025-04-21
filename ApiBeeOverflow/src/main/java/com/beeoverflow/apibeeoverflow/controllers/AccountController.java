@@ -48,10 +48,16 @@ public class AccountController {
         Response response = new Response();
 
         String token = accountService.verifyAccount(accountBean);
+        if (token != null) {
+            response.setStatus(1);
+            response.setMessage("Đăng nhập thành công");
+            response.setData(token);
+        } else {
+            response.setStatus(0);
+            response.setMessage("Tên đăng nhập hoặc mật khẩu không chính xác!");
+            response.setData(null);
+        }
 
-        response.setStatus(1);
-        response.setMessage("Đăng nhập thành công");
-        response.setData(token);
 
         return ResponseEntity.ok(response);
     }

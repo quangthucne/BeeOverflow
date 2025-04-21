@@ -99,7 +99,7 @@ public class AccountService {
             return token;
 
         } catch (AuthenticationException e) {
-            return "username or password incorrect";
+            return null;
         }
 
     }

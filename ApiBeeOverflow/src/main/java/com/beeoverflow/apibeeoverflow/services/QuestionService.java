@@ -87,7 +87,7 @@ public class QuestionService {
     public Question updateQuestion(QuestionBean questionBean) {
         LocalDateTime now = LocalDateTime.now();
         Question question = questionJPA.findById(questionBean.getId());
-        Account account = accountService.getAccountById(jwtUtil.extractUserId(cookiesUtil.getToken()));
+        Account account = accountService.getAccountById(jwtUtil.extractUserId(jwtUtil.getTokenFromRequest()));
 
         System.out.println("question id: " + questionBean.getId());
 

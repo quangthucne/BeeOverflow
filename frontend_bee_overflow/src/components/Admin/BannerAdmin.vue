@@ -27,9 +27,15 @@
           </RouterLink>
         </li>
         <li>
-          <RouterLink to="/blacklist" class="nav-link">
-            <i class="bi bi-person-x-fill"></i>
-            <span>Danh sách đen</span>
+          <RouterLink to="/blacklist/users" class="nav-link">
+            <i class="bi bi-people-fill me-2"></i>
+            <span>Danh sách người dùng đen</span>
+          </RouterLink>
+        </li>
+        <li>
+          <RouterLink to="/blacklist/questions" class="nav-link">
+            <i class="bi bi-question-circle-fill me-2"></i>
+            <span>Danh sách câu hỏi đen</span>
           </RouterLink>
         </li>
       </ul>
@@ -57,8 +63,14 @@
                 <i class="bi bi-person-circle"></i> Admin
               </button>
               <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
-                <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                <li>
+                  <a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#"
+                    ><i class="bi bi-box-arrow-right me-2"></i>Logout</a
+                  >
+                </li>
               </ul>
             </div>
           </div>
@@ -227,5 +239,22 @@ body {
 
 .bi {
   margin-right: 10px;
+}
+/* Đảm bảo dropdown nằm trên sidebar */
+#sidebar .dropdown-menu {
+  position: static;
+  float: none;
+  box-shadow: none;
+  background-color: rgba(255, 255, 255, 0.05);
+  padding-left: 20px;
+}
+
+#sidebar .dropdown-menu .dropdown-item {
+  color: var(--primary-foreground);
+  padding: 10px 15px;
+}
+
+#sidebar .dropdown-menu .dropdown-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 </style>

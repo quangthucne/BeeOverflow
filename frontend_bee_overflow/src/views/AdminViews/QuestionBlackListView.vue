@@ -1,18 +1,16 @@
 <script setup>
 import BannerAdmin from '@/components/Admin/BannerAdmin.vue'
-import BlackList from '@/components/Admin/BlackList.vue'
+import QuestionBlackList from '@/components/Admin/QuestionBlackList.vue'
 </script>
 
 <template>
   <div class="admin-layout">
-    <!-- Banner bên trái -->
     <div class="admin-sidebar">
       <BannerAdmin />
     </div>
 
-    <!-- Nội dung chính bên phải -->
     <div class="admin-content">
-      <BlackList />
+      <QuestionBlackList />
     </div>
   </div>
 </template>

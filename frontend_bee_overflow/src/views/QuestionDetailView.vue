@@ -1,7 +1,7 @@
 <script setup>
 import HeaDer from '@/components/User/HeaDer.vue'
 import FooTer from '@/components/User/FooTer.vue'
-import QuestionInputComponent from '@/components/User/QuestionInputComponent.vue'
+import QuestionDetail from '@/components/User/QuestionDetail.vue';
 </script>
 
 <template>
@@ -10,7 +10,7 @@ import QuestionInputComponent from '@/components/User/QuestionInputComponent.vue
   </header>
   <main>
     <section>
-      <QuestionInputComponent />
+      <QuestionDetail />
     </section>
   </main>
   <footer>

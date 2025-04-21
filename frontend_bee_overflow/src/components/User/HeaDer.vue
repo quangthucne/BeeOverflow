@@ -1,9 +1,11 @@
-<script setup></script>
+<script setup>
+
+</script>
 
 <template>
   <header>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow">
-      <div class="container">
+      <div class="container ">
         <a class="navbar-brand fw-bold d-flex align-items-center" href="#">
           <a class="nav-link" href="#"
             ><RouterLink to="/" class="nav-link">
@@ -22,7 +24,12 @@
           <ul class="navbar-nav">
             <li class="nav-item">
               <a class="nav-link" href="#"
-                ><RouterLink to="/" class="nav-link">Câu hỏi</RouterLink></a
+                ><RouterLink to="/" class="nav-link">Trang chủ</RouterLink></a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#"
+                ><RouterLink to="/questions" class="nav-link">Câu hỏi</RouterLink></a
               >
             </li>
             <li class="nav-item">
@@ -37,16 +44,11 @@
             </li>
             <li class="nav-item">
               <a class="nav-link" href="#"
-                ><RouterLink to="/userinfo" class="nav-link">Tôi</RouterLink></a
-              >
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#"
                 ><RouterLink to="/listuser" class="nav-link">Bảng xếp hạng</RouterLink></a
               >
             </li>
             <li class="nav-item">
-              <RouterLink to="/" class="btn btn-outline-primary btn-outline-primary mt-2"
+              <RouterLink to="/question/add" class="btn btn-outline-primary btn-outline-primary mt-2"
                 >Thêm câu hỏi</RouterLink
               >
             </li>

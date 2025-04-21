@@ -78,6 +78,8 @@ import { defineComponent, ref, onMounted, computed } from 'vue'
 import axios from 'axios'
 import AnswerNode from './AnswerNode.vue'
 import { QuestionDTO, Response } from './types'
+import { useRoute } from 'vue-router'
+
 
 export default defineComponent({
   name: 'QuestionDetail',
@@ -85,10 +87,12 @@ export default defineComponent({
     AnswerNode,
   },
   setup() {
+    const route = useRoute()
     const question = ref<QuestionDTO | null>(null)
     const loading = ref(true)
     const error = ref<string | null>(null)
     const expandedAnswers = ref<number[]>([])
+    const questionId = route.params.id
 
     // Compute filtered answers to handle isDeleted logic
     const filteredAnswers = computed(() => {
@@ -99,7 +103,7 @@ export default defineComponent({
     // Fetch question data from API
     const fetchQuestion = async () => {
       try {
-        const response = await axios.get<Response>('http://localhost:8080/question/37')
+        const response = await axios.get<Response>('http://localhost:8080/question/'+ questionId)
         console.log('API Response:', response.data) // Debug log
         if (response.data.status === 1) {
           question.value = response.data.data

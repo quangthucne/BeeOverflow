@@ -188,7 +188,7 @@
               </div>
 
               <!-- Submit Button -->
-              <button type="submit" class="btn btn-primary w-100 py-2" :disabled="loading">
+              <button type="submit" class="btn btn-warning w-100 py-2" :disabled="loading">
                 <span v-if="!loading">Đăng ký</span>
                 <span v-else class="spinner-border spinner-border-sm" role="status"></span>
               </button>

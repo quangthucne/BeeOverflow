@@ -42,6 +42,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Stateless
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/account/login").permitAll()
+                        .requestMatchers("/account/register").permitAll()
+
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Cho phép //
                                                                                 // OPTIONS
                         .requestMatchers("/question/add").hasRole("USER") // Yêu cầu xác thực
@@ -74,9 +76,9 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         // Thay thế setAllowedOrigins bằng:
-        // config.setAllowedOriginPatterns(Arrays.asList("*")); // Cho phép mọi origin
+         configuration.setAllowedOriginPatterns(Arrays.asList("*")); // Cho phép mọi origin
         // nhưng vẫn credentials
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+//        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
         configuration.setAllowedMethods(Arrays.asList("*"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setExposedHeaders(Arrays.asList("Authorization"));

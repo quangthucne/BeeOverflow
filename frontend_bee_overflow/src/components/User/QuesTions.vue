@@ -2,21 +2,18 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import Cookies from 'js-cookie'
+import router from '@/router'
 
 const questions = ref([])
-const maxVisibleImages = 4
 const accountId = ref(null)
+const selectedImage = ref('')
 
-function getImageUrl(name) {
-  return `${name}`
-}
-
-function visibleImages(images) {
-  return images.slice(0, maxVisibleImages)
+function openImage(imageUrl) {
+  selectedImage.value = imageUrl
 }
 
 function formatDate(date) {
-  return new Date(date).toLocaleString('en-US', {
+  return new Date(date).toLocaleString('vi-VN', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -41,98 +38,198 @@ function getAccountIdFromToken() {
   if (!token) return null
 
   const payload = JSON.parse(atob(token.split('.')[1]))
-  console.log(payload.accountId || payload.id)
-  return payload.accountId || payload.id // tuỳ cấu trúc JWT
+  return payload.accountId || payload.id
 }
 
 function handleEdit(questionId) {
   console.log('Edit question', questionId)
-  // Add your navigation or modal logic here
 }
 
 function handleDelete(questionId) {
   console.log('Delete question', questionId)
-  // Add confirmation and API call here
 }
 
 onMounted(() => {
   accountId.value = getAccountIdFromToken()
   getAllQuestions()
 })
+function goToQuestionDetail(questionId) {
+  // Tự sửa lại phần link theo định tuyến của bạn
+  router.push(`/question/detail/${questionId}`)
+}
 </script>
 
 <template>
   <div class="custom-container mt-4">
-    <div class="card p-4 mb-3" v-for="(question, index) in questions" :key="question.id">
-      <div class="card mb-4 shadow-sm">
-        <div class="card-body position-relative">
-          <!-- Avatar & Name -->
-          <div class="d-flex align-items-center mb-3">
-            <img
-              :src="question.account.avatar || 'https://via.placeholder.com/50'"
-              alt="Avatar"
-              class="rounded-circle me-3"
-              style="width: 40px; height: 40px"
-            />
-            <div>
-              <h6 class="mb-0">
-                {{ question.account.fullname }} (@{{ question.account.username }})
-              </h6>
-              <small class="text-muted">
-                {{ question.createdDate ? formatDate(question.createdDate) : 'No date available' }}
-              </small>
-            </div>
-          </div>
-          <small v-text="question.account.id"></small>
-          <!-- Dropdown menu -->
-          <div
-            v-if="question.account.id == accountId"
-            class="position-absolute top-0 end-0 m-3 dropdown"
-          >
-            <button
-              class="btn btn-light btn-sm dropdown-toggle"
-              type="button"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            ></button>
-            <ul class="dropdown-menu">
-              <li>
-                <a class="dropdown-item" href="#" @click.prevent="handleEdit(question.id)"
-                  >Chỉnh sửa</a
-                >
-              </li>
-              <li>
-                <a
-                  class="dropdown-item text-danger"
-                  href="#"
-                  @click.prevent="handleDelete(question.id)"
-                  >Xoá</a
-                >
-              </li>
-            </ul>
-          </div>
-
-          <h3 class="card-title text-primary mb-3 ms-3">{{ question.title }}</h3>
-          <div class="detail" v-html="question.detail"></div>
-          <div v-if="question.imagesQues.length" class="d-flex flex-wrap gap-2 mt-3 ms-3">
-            <img
-              v-for="image in question.imagesQues"
-              :key="image.id"
-              :src="image.name"
-              alt="Question Image"
-              class="img-fluid rounded"
-              style="width: 500px; height: 500px; object-fit: cover"
-            />
+    <div
+      class="card mb-4 shadow-sm rounded-4"
+      v-for="(question, index) in questions"
+      :key="question.id"
+    >
+      <div class="card-body p-4 position-relative">
+        <!-- Avatar & User Info -->
+        <div class="d-flex align-items-center mb-3">
+          <img
+            :src="question.account.avatar || 'https://via.placeholder.com/50'"
+            alt="Avatar"
+            class="rounded-circle me-3 border"
+            style="width: 45px; height: 45px; object-fit: cover"
+          />
+          <div>
+            <h6 class="mb-0 fw-bold">
+              {{ question.account.fullname }} (@{{ question.account.username }})
+            </h6>
+            <small class="text-muted">
+              {{ question.createdDate ? formatDate(question.createdDate) : 'No date available' }}
+            </small>
           </div>
         </div>
 
-        <div v-if="question.tags.length" class="card-footer bg-light">
-          <span class="text-muted">Tags:</span>
-          <span v-for="tag in question.tags" :key="tag.id" class="badge bg-primary text-white ms-2">
-            {{ tag.name }}
-          </span>
+        <!-- Dropdown -->
+        <div
+          v-if="question.account.id == accountId"
+          class="position-absolute top-0 end-0 m-3 dropdown"
+        >
+          <button
+            class="btn btn-light btn-sm dropdown-toggle"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            <i class="fas fa-ellipsis-v"></i>
+          </button>
+          <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-item" href="/" @click.prevent="handleEdit(question.id)">
+                <i class="fas fa-edit me-2 text-primary"></i>Chỉnh sửa
+              </a>
+            </li>
+            <li>
+              <a
+                class="dropdown-item text-danger"
+                href="#"
+                @click.prevent="handleDelete(question.id)"
+              >
+                <i class="fas fa-trash-alt me-2"></i>Xoá
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Tiêu đề và nội dung -->
+        <h5 class="text-primary fw-semibold mb-2">{{ question.title }}</h5>
+        <div class="detail mb-3" v-html="question.detail"></div>
+
+        <!-- Hình ảnh -->
+        <!-- Hình ảnh -->
+        <div v-if="question.imagesQues.length" class="image-grid mb-3">
+          <div
+            v-for="(image, idx) in question.imagesQues.slice(0, 3)"
+            :key="image.id"
+            class="image-box position-relative"
+            :data-bs-toggle="idx === 2 && question.imagesQues.length > 3 ? null : 'modal'"
+            :data-bs-target="idx === 2 && question.imagesQues.length > 3 ? null : '#imageModal'"
+            @click="
+              idx === 2 && question.imagesQues.length > 3
+                ? goToQuestionDetail(question.id)
+                : openImage(image.name)
+            "
+          >
+            <img
+              :src="image.name"
+              alt="Question Image"
+              class="img-fluid rounded border"
+              style="width: 100%; height: 100%; object-fit: cover"
+            />
+
+            <!-- Overlay nếu là ảnh thứ 3 và còn nhiều ảnh nữa -->
+            <div v-if="idx === 2 && question.imagesQues.length > 3" class="overlay">
+              +{{ question.imagesQues.length - 3 }} ảnh
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal xem ảnh -->
+        <div
+          class="modal fade"
+          id="imageModal"
+          tabindex="-1"
+          aria-labelledby="imageModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-dark">
+              <div class="modal-body p-0">
+                <img :src="selectedImage" class="img-fluid w-100" />
+              </div>
+              <div class="modal-footer justify-content-center border-0">
+                <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">
+                  Đóng
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tags và Voting gọn trong footer -->
+        <div class="border-top pt-3 d-flex flex-wrap justify-content-between align-items-center">
+          <!-- Tags -->
+          <div v-if="question.tags.length" class="mb-2 mb-md-0">
+            <span class="text-muted">Tags:</span>
+            <span
+              v-for="tag in question.tags"
+              :key="tag.id"
+              class="badge bg-primary text-white ms-2"
+            >
+              {{ tag.name }}
+            </span>
+          </div>
+
+          <!-- Upvote/Downvote -->
+          <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-outline-success btn-sm d-flex align-items-center gap-1">
+              <i class="fas fa-arrow-up"></i> Upvote
+            </button>
+            <button class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1">
+              <i class="fas fa-arrow-down"></i> Downvote
+            </button>
+            <span class="text-muted">Điểm: {{ question.votes || 0 }}</span>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.image-box {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  font-weight: bold;
+  font-size: 1rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+</style>

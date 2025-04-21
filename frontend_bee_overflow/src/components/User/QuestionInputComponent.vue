@@ -2,16 +2,14 @@
   <div class="container my-5">
     <div class="card shadow-sm">
       <div class="card-header bg-primary text-white">
-        <h4 class="mb-0">Add a New Question</h4>
+        <h4 class="mb-0">{{ isEditMode ? 'Edit Question' : 'Add a New Question' }}</h4>
       </div>
       <div class="card-body">
-        <!-- Success/Error Messages -->
         <div v-if="successMessage" class="alert alert-success">{{ successMessage }}</div>
         <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
 
-        <!-- Form -->
         <form @submit.prevent="submitQuestion">
-          <!-- Title -->
+          <input type="hidden" v-model="form.id" />
           <div class="mb-3">
             <label for="title" class="form-label">Question Title</label>
             <input
@@ -24,13 +22,11 @@
             />
           </div>
 
-          <!-- Detail -->
           <div class="mb-3">
             <label class="form-label">Question Detail</label>
-            <InputDetail @update:content="updateDetail" />
+            <InputDetail v-model:content="form.detail" />
           </div>
 
-          <!-- Upload Image -->
           <div class="mb-3">
             <label class="form-label">Upload Image (Optional)</label>
             <UploadImage @upload-complete="handleImageUpload" />
@@ -46,7 +42,6 @@
             </div>
           </div>
 
-          <!-- Tags -->
           <div class="mb-3">
             <label class="form-label">Tags</label>
             <VueMultiselect
@@ -65,9 +60,16 @@
             <small class="form-text text-muted">Select or create tags, then press Enter.</small>
           </div>
 
-          <!-- Submit -->
           <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
-            {{ isSubmitting ? 'Submitting...' : 'Submit Question' }}
+            {{
+              isSubmitting
+                ? isEditMode
+                  ? 'Updating...'
+                  : 'Submitting...'
+                : isEditMode
+                  ? 'Update Question'
+                  : 'Submit Question'
+            }}
           </button>
         </form>
       </div>
@@ -76,8 +78,8 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { reactive, ref, onMounted, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import Cookies from 'js-cookie'
 
@@ -90,22 +92,20 @@ interface Tag {
 }
 
 interface QuestionForm {
+  id: string
   title: string
   detail: string
   images: string[]
   tags: Tag[]
 }
 
-interface ApiResponse {
-  status: number
-  message: string
-  data?: any
-}
-
+const route = useRoute()
 const router = useRouter()
+const questionId = route.params.id
+const isEditMode = computed(() => !!questionId)
 
-// Form state
 const form = reactive<QuestionForm>({
+  id: '',
   title: '',
   detail: '',
   images: [],
@@ -120,24 +120,15 @@ const availableTags = ref<Tag[]>([
   { name: 'react' },
 ])
 
-// UI state
 const isSubmitting = ref(false)
 const successMessage = ref<string | null>(null)
 const errorMessage = ref<string | null>(null)
 
-// Handle CKEditor detail
-const updateDetail = (newContent: string) => {
-  form.detail = newContent
-}
-
-// Handle Cloudinary image uploads
 const handleImageUpload = (uploadedUrls: string[]) => {
-  // clean quote marks if needed
   const cleaned = uploadedUrls.map((url) => url.replace(/^"+|"+$/g, ''))
   form.images.push(...cleaned)
 }
 
-// Create new tag on Enter
 const addNewTag = (newTag: string) => {
   const tag = { name: newTag.trim() }
   if (tag.name && !availableTags.value.some((t) => t.name === tag.name)) {
@@ -146,9 +137,32 @@ const addNewTag = (newTag: string) => {
   form.tags.push(tag)
 }
 
-// Submit to backend
+onMounted(async () => {
+  if (isEditMode.value) {
+    try {
+      const token = Cookies.get('token')
+      const response = await axios.get(`http://localhost:8080/question/${questionId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      })
+
+      const data = response.data.data
+      form.id = data.id
+      form.title = data.title
+      form.detail = data.detail
+      form.images = data.imagesQues?.map((img: any) => img.name) || []
+      form.tags = data.tags || []
+
+      console.log(form)
+    } catch (err) {
+      errorMessage.value = 'Failed to load question data.'
+    }
+  }
+})
+
 const submitQuestion = async () => {
-  // Basic validation
   if (!form.title || !form.detail) {
     errorMessage.value = 'Please fill in the title and detail.'
     return
@@ -167,27 +181,46 @@ const submitQuestion = async () => {
     }
 
     const formData = new FormData()
+    formData.append('id', form.id)
     formData.append('title', form.title)
     formData.append('detail', form.detail)
     form.images.forEach((url) => formData.append('images', url))
     const tagNames = form.tags.map((tag) => tag.name)
     formData.append('name', JSON.stringify(tagNames))
 
-    const response = await axios.post<ApiResponse>('http://localhost:8080/question/add', formData, {
+    const url = isEditMode.value
+      ? `http://localhost:8080/question/update`
+      : 'http://localhost:8080/question/add'
+
+    const method = 'post'
+
+    const response = await axios({
+      method,
+      url,
+      data: formData,
       headers: {
         'Content-Type': 'multipart/form-data',
         Authorization: `Bearer ${token}`,
       },
       withCredentials: true,
     })
+      .then
+      // chuyển đến trang chi tiết câu hỏi
+      ()
 
     const { status, message } = response.data
     if (status === 1) {
-      successMessage.value = 'Question submitted successfully!'
-      form.title = ''
-      form.detail = ''
-      form.images = []
-      form.tags = []
+      successMessage.value = isEditMode.value
+        ? 'Question updated successfully!'
+        : 'Question submitted successfully!'
+      if (!isEditMode.value) {
+        form.title = ''
+        form.detail = ''
+        form.images = []
+        form.tags = []
+      } else {
+        router.push(`/question/${questionId}`)
+      }
     } else {
       errorMessage.value = message || 'Failed to submit question.'
     }
@@ -200,7 +233,6 @@ const submitQuestion = async () => {
       errorMessage.value =
         err.response?.data?.message || err.response?.data?.error || 'Submission error.'
     }
-    console.error('Error submitting:', err)
   } finally {
     isSubmitting.value = false
   }

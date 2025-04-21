@@ -62,6 +62,11 @@ const router = createRouter({
       component: QuestionInputView,
     },
     {
+      path: '/question/edit/:id',
+      name: 'edit',
+      component: QuestionInputView,
+    },
+    {
       path: '/upload',
       name: 'upload',
       component: UploadImageView,

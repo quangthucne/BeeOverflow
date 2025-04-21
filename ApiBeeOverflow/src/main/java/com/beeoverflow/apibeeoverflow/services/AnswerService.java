@@ -5,6 +5,7 @@ import com.beeoverflow.apibeeoverflow.entities.Account;
 import com.beeoverflow.apibeeoverflow.entities.Answer;
 import com.beeoverflow.apibeeoverflow.entities.Question;
 import com.beeoverflow.apibeeoverflow.utils.CookiesUtil;
+import com.beeoverflow.apibeeoverflow.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,13 +29,16 @@ public class AnswerService {
     @Autowired
     CookiesUtil cookiesUtil;
 
+    @Autowired
+    JwtUtil jwtUtil;
+
     public Answer findById(int id) {
         return answerJPA.findById(id);
     }
 
     public Answer create(AnswerBean answerBean) {
         Answer answer = new Answer();
-        Account account = accountService.getAccountById(Integer.parseInt(cookiesUtil.getCookie().get("accountId")));
+        Account account = accountService.getAccountById(jwtUtil.extractUserId(jwtUtil.getTokenFromRequest()));
         Question question = questionService.getByQuestion(answerBean.getQuestionId());
 
         answer.setAccount(account);
@@ -57,7 +61,7 @@ public class AnswerService {
 
     public Answer update(AnswerBean answerBean) {
         Answer answer = answerJPA.findById(answerBean.getId());
-        Account account = accountService.getAccountById(Integer.parseInt(cookiesUtil.getCookie().get("accountId")));
+        Account account = accountService.getAccountById(jwtUtil.extractUserId(jwtUtil.getTokenFromRequest()));
         Question question = questionService.getByQuestion(answerBean.getQuestionId());
 
         answer.setAccount(account);

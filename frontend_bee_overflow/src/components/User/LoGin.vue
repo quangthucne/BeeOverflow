@@ -5,7 +5,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { required, minLength, helpers } from '@vuelidate/validators'
 import axios from 'axios'
 import Swal from 'sweetalert2'
-import Cookies from 'js-cookie' // Import thư viện js-cookie
+import Cookies from 'js-cookie'
 
 const router = useRouter()
 const loading = ref(false)
@@ -18,11 +18,9 @@ const form = ref({
 const rules = computed(() => ({
   username: {
     required: helpers.withMessage('Vui lòng nhập tên đăng nhập!', required),
-    minLength: minLength(3),
   },
   password: {
     required: helpers.withMessage('Vui lòng nhập mật khẩu', required),
-    minLength: minLength(6),
   },
 }))
 
@@ -44,19 +42,27 @@ const submitLogin = async () => {
       username: form.value.username,
       password: form.value.password,
     })
-
+    console.log(res.data.status)
+    let status = res.data.status
     // Lưu token vào cookie
-    const token = res.data.data
-    Cookies.set('token', token, { expires: 0.5 }) // Lưu token với thời gian hết hạn là 7 ngày
+    if (status === 1) {
+      const token = res.data.data
+      Cookies.set('token', token, { expires: 0.5 })
 
-    Swal.fire({
-      icon: 'success',
-      title: 'Đăng nhập thành công!',
-      text: 'Chào mừng bạn quay lại!',
-    }).then(() => {
-      // Chuyển hướng đến trang chính sau khi đăng nhập thành công
-      router.push('/')
-    })
+      Swal.fire({
+        icon: 'success',
+        title: 'Đăng nhập thành công!',
+        text: 'Chào mừng bạn quay lại!',
+      }).then(() => {
+        router.push('/')
+      })
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Đăng nhập thất bại',
+        text: res.data.message,
+      })
+    }
   } catch (error: any) {
     Swal.fire({
       icon: 'error',

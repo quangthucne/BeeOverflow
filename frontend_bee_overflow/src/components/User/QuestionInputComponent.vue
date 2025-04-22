@@ -181,7 +181,9 @@ const submitQuestion = async () => {
     }
 
     const formData = new FormData()
-    formData.append('id', form.id)
+    if (Number(form.id) > 0) {
+      formData.append('id', form.id)
+    }
     formData.append('title', form.title)
     formData.append('detail', form.detail)
     form.images.forEach((url) => formData.append('images', url))

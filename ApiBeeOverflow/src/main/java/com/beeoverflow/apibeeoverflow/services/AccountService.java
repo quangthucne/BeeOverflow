@@ -34,6 +34,9 @@ public class AccountService {
     AccountMapper accountMapper;
 
     @Autowired
+    ReputationService reputationService;
+
+    @Autowired
     CookiesUtil cookiesUtil;
 
     @Autowired
@@ -76,7 +79,7 @@ public class AccountService {
         }
 
         Account savedAccount = accountJPA.save(account);
-
+        reputationService.create(account);
         return savedAccount;
 
         // chưa batws unique email và username

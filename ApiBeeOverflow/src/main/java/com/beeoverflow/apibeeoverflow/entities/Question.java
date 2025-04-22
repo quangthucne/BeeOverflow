@@ -53,7 +53,8 @@ public class Question {
     private List<Answer> answers;
 
     @OneToMany(mappedBy = "ques", fetch = FetchType.LAZY)
-    private Set<QuestionVote> questionVotes = new LinkedHashSet<>();
+    @JsonManagedReference
+    private List<QuestionVote> questionVotes;
 
     @JsonManagedReference
     @OneToMany(mappedBy = "question", fetch = FetchType.LAZY)

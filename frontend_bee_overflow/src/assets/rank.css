@@ -1,0 +1,96 @@
+/* body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f4f4f4;
+  padding: 20px;
+} */
+
+.rank-container {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+}
+
+.rank-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 10px;
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.rank-label {
+  font-size: 16px;
+}
+
+/* Newbie */
+.newbie {
+  background-color: #d3d3d3;
+  /* Màu xám nhạt */
+}
+
+/* Learner */
+.learner {
+  background-color: #87ceeb;
+  /* Xanh dương nhạt */
+}
+
+/* Contributor */
+.contributor {
+  background-color: #32cd32;
+  /* Xanh lá */
+}
+
+/* Expert */
+.expert {
+  background-color: #ffa500;
+  /* Cam */
+  border: 2px solid #ffd700;
+  /* Viền vàng */
+}
+
+/* Master */
+.master {
+  background-color: #ff4500;
+  /* Đỏ cam */
+  border: 2px solid #ffd700;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+/* Guru */
+.guru {
+  background-color: #800080;
+  /* Tím */
+  border: 2px solid #ffd700;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Legend */
+.legend {
+  background: linear-gradient(45deg, #ffd700, #ff69b4);
+  /* Gradient vàng - hồng */
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+  animation: glow 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    box-shadow:
+      0 0 10px #ffd700,
+      0 0 20px #ff69b4;
+  }
+
+  to {
+    box-shadow:
+      0 0 20px #ffd700,
+      0 0 30px #ff69b4;
+  }
+}

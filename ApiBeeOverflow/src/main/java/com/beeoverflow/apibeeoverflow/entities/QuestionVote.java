@@ -1,5 +1,6 @@
 package com.beeoverflow.apibeeoverflow.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,6 +18,7 @@ public class QuestionVote {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ques_id")
+    @JsonBackReference
     private Question ques;
 
     @ColumnDefault("0")

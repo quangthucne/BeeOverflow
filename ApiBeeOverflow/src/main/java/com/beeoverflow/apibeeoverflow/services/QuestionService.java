@@ -37,10 +37,15 @@ public class QuestionService {
     TagService tagService;
 
     @Autowired
+    VoteService voteService;
+
+    @Autowired
     JwtUtil jwtUtil;
 
     @Autowired
     CookiesUtil cookiesUtil;
+    @Autowired
+    private ReputationService reputationService;
 
     public List<QuestionDTO> getQuestions() {
 //        List<Question> questions = questionJPA.findAll().stream()
@@ -55,6 +60,7 @@ public class QuestionService {
 
     public QuestionDTO createQuestion(QuestionBean questionBean, TagBean tagBean) {
         LocalDateTime now = LocalDateTime.now();
+        int point = 1;
         Account account = accountService.getAccountById(jwtUtil.extractUserId(jwtUtil.getTokenFromRequest()));
         Question question = new Question();
 
@@ -66,6 +72,9 @@ public class QuestionService {
         question.setIsDeleted(false);
 
         Question newQues = questionJPA.save(question);
+
+        voteService.createQuesVote(newQues);
+        reputationService.update(account, point);
 
         if (questionBean.getImages() != null) {
             imageService.saveImages(questionBean.getImages(), newQues);

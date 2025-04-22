@@ -105,8 +105,8 @@ public class Account {
     @OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
     private List<Question> questions;
 
-    @OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
-    private Set<Reputation> reputations = new LinkedHashSet<>();
+    @OneToOne(mappedBy = "account", fetch = FetchType.LAZY)
+    private Reputation reputation;
 
     @NotNull
     @Column(name = "gender", nullable = false)

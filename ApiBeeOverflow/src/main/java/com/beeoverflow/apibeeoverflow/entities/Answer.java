@@ -23,7 +23,7 @@ public class Answer {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
-    @JsonBackReference
+    @JsonManagedReference
     private Account account;
 
     @JsonBackReference
@@ -49,7 +49,7 @@ public class Answer {
 
     @OneToMany(mappedBy = "parent")
     @JsonManagedReference
-    private List<Answer> answers;
+    private List<Answer> answersInParent;
 
     @OneToMany(mappedBy = "ans")
     @JsonManagedReference

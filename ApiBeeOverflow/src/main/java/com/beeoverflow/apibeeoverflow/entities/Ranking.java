@@ -1,18 +1,16 @@
 package com.beeoverflow.apibeeoverflow.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 @Getter
 @Setter
 @Entity
-@Table(name = "rank")
-public class Rank {
+@Table(name = "ranking")
+public class Ranking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -26,7 +24,8 @@ public class Rank {
     @Column(name = "icon")
     private String icon;
 
-    @OneToMany(mappedBy = "rank")
-    private Set<Reputation> reputations = new LinkedHashSet<>();
+    @OneToOne(mappedBy = "rank", fetch = FetchType.LAZY)
+    @JsonBackReference
+    private Reputation reputations;
 
 }

@@ -1,7 +1,7 @@
 <script setup>
 import HeaDer from '@/components/User/HeaDer.vue'
 import FooTer from '@/components/User/FooTer.vue'
-import InputComment from '@/components/User/InputComment.vue';
+import AnswerInputComponent from '@/components/User/AnswerInputComponent.vue'
 </script>
 
 <template>
@@ -9,7 +9,7 @@ import InputComment from '@/components/User/InputComment.vue';
     <HeaDer />
   </header>
   <main>
-<InputComment />
+    <AnswerInputComponent />
   </main>
 
   <footer>

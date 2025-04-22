@@ -4,15 +4,18 @@
       class="editor-container editor-container_classic-editor editor-container_include-fullscreen"
       ref="editorContainer"
     >
-      <!-- :model-value="modelValue" -->
-      <ckeditor
-        v-if="editor && config"
-        :editor="editor"
-        :config="config"
-        :content="content"
-        @update:modelValue="handleChange"
-        @ready="onReady"
-      />
+      <div class="editor-container__editor">
+        <div ref="editorElement">
+          <ckeditor
+            v-if="editor && config"
+            :editor="editor"
+            :config="config"
+            :content="content"
+            @update:modelValue="handleChange"
+            @ready="onReady"
+          />
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -211,10 +214,10 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.editor-container {
+/* .editor-container {
   border: 1px solid #ced4da;
   border-radius: 6px;
   padding: 10px;
   background-color: #fff;
-}
+} */
 </style>

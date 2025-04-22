@@ -1,7 +1,7 @@
 package com.beeoverflow.apibeeoverflow.services;
 
 import com.beeoverflow.apibeeoverflow.entities.Account;
-import com.beeoverflow.apibeeoverflow.entities.Rank;
+import com.beeoverflow.apibeeoverflow.entities.Ranking;
 import com.beeoverflow.apibeeoverflow.entities.Reputation;
 import com.beeoverflow.apibeeoverflow.jpas.RankJPA;
 import com.beeoverflow.apibeeoverflow.jpas.ReputationJPA;
@@ -19,7 +19,7 @@ public class ReputationService {
 
     public Reputation create(Account account) {
         Reputation reputation = new Reputation();
-        Rank rank = rankJPA.findById(1);
+        Ranking rank = rankJPA.findById(1);
 
         reputation.setAccount(account);
         reputation.setPoint(0);

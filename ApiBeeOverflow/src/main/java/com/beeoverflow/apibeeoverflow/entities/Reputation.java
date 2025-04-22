@@ -1,5 +1,7 @@
 package com.beeoverflow.apibeeoverflow.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,11 +18,13 @@ public class Reputation {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
+    @JsonBackReference
     private Account account;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rank_id")
-    private Rank rank;
+    @JsonManagedReference
+    private Ranking rank;
 
     @Column(name = "point")
     private Integer point;

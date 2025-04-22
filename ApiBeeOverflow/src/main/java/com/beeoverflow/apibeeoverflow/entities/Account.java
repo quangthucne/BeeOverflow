@@ -89,7 +89,7 @@ public class Account {
         return Role.fromValue(this.role);
     }
 
-    @JsonManagedReference
+    @JsonBackReference
     @OneToMany(mappedBy = "account")
     private List<Answer> answers;
 
@@ -106,6 +106,7 @@ public class Account {
     private List<Question> questions;
 
     @OneToOne(mappedBy = "account", fetch = FetchType.LAZY)
+    @JsonManagedReference
     private Reputation reputation;
 
     @NotNull

@@ -1,69 +1,39 @@
 <template>
   <div class="container">
-  <div class="comment-form card p-4 shadow-sm">
-    <h4 class="mb-4">Gửi bình luận</h4>
+    <div class="comment-form card p-4 shadow-sm">
+      <h4 class="mb-4">Trả lời câu hỏi</h4>
 
-    <div class="mb-3">
-      <label for="commentTitle" class="form-label">Tiêu đề bình luận</label>
-      <input type="text" id="commentTitle" class="form-control" placeholder="Nhập tiêu đề bình luận" />
-    </div>
-
-    <div class="main-container">
-    <div
-      class="editor-container editor-container_classic-editor editor-container_include-fullscreen"
-      ref="editorContainer"
-      style="width: 1200px;"
-    >
-      <!-- :model-value="modelValue" -->
-      <ckeditor
-        v-if="editor && config"
-        :editor="editor"
-        :config="config"
-        :content="content"
-        @update:modelValue="handleChange"
-        @ready="onReady"
-      />
-    </div>
-  </div>
-
-
-  <div class="upload-container">
-    <input
-      type="file"
-      ref="fileInput"
-      accept=".pdf"
-      @change="handleFileChange"
-      class="file-input"
-    />
-    <button @click="uploadFile" :disabled="!selectedFile || isUploading" class="upload-button">
-      {{ isUploading ? 'Uploading...' : 'Upload PDF' }}
-    </button>
-
-    <div v-if="uploadProgress > 0" class="progress-bar">
-      <div :style="{ width: uploadProgress + '%' }"></div>
-    </div>
-
-    <div v-if="error" class="error-message">
-      {{ error }}
-    </div>
-
-    <div v-if="pdfUrl" class="success-message">
-      <p>Upload thành công!</p>
-      <a :href="pdfUrl" target="_blank" class="view-link">Xem PDF</a>
-      <button @click="copyLink" class="copy-button">Copy link</button>
+      <div class="main-container">
+        <div
+          class="editor-container editor-container_classic-editor editor-container_include-fullscreen"
+          ref="editorContainer"
+          style="width: 1200px"
+        >
+          <!-- :model-value="modelValue" -->
+          <ckeditor
+            v-if="editor && config"
+            :editor="editor"
+            :config="config"
+            :content="content"
+            @update:modelValue="handleChange"
+            @ready="onReady"
+          />
+        </div>
+      </div>
+      <div class="upload">
+        <UploadImage />
+      </div>
+      <div class="d-grid">
+        <button class="btn btn-primary">Gửi bình luận</button>
+      </div>
     </div>
   </div>
-
-    <div class="d-grid">
-      <button class="btn btn-primary">Gửi bình luận</button>
-    </div>
-  </div>
-</div>
 </template>
 
 <script lang="ts" setup>
 import { computed, ref, watch, onMounted } from 'vue'
 import { Ckeditor, useCKEditorCloud } from '@ckeditor/ckeditor5-vue'
+import UploadImage from './UploadImage.vue'
 
 const props = defineProps<{
   modelValue: string
@@ -253,9 +223,9 @@ onMounted(() => {
   isLayoutReady.value = true
 })
 
-
 import { ref } from 'vue'
 import { supabase } from '@/config/supabase'
+import UploadImage from './UploadImage.vue'
 
 const selectedFile = ref(null)
 const pdfUrl = ref('')
@@ -316,7 +286,6 @@ const copyLink = () => {
 </script>
 
 <style scoped>
-
 .comment-form {
   max-width: 2200px; /* hoặc 100%, nếu bạn muốn full màn hình */
   margin: 0 auto;
@@ -405,5 +374,4 @@ const copyLink = () => {
   border-radius: 4px;
   cursor: pointer;
 }
-
 </style>

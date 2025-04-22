@@ -1,124 +1,276 @@
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import axios from 'axios'
+import { Modal } from 'bootstrap'
+import AnswerNode from './AnswerNode.vue'
+import AnswerInputComponent from './AnswerInputComponent.vue'
+import { QuestionDTO, Response } from './types'
+import Cookies from 'js-cookie'
+
+const route = useRoute()
+const question = ref<QuestionDTO | null>(null)
+const loading = ref(true)
+const error = ref<string | null>(null)
+const expandedAnswers = ref<number[]>([])
+const questionId = route.params.id
+
+const showMainAnswerForm = ref(false)
+const toggleMainAnswerForm = () => {
+  showMainAnswerForm.value = !showMainAnswerForm.value
+  // Đóng tất cả các form trả lời cho câu trả lời khác
+  Object.keys(answerForms.value).forEach((key) => {
+    answerForms.value[key] = false
+  })
+}
+
+// Lấy accountId từ token
+const accountId = getAccountIdFromToken()
+console.log('accountid: ' + accountId)
+function getAccountIdFromToken() {
+  const token = Cookies.get('token')
+  if (!token) return null
+
+  const payload = JSON.parse(atob(token.split('.')[1]))
+  return payload.accountId || payload.id
+}
+
+const toggleAnswer = (id: number) => {
+  expandedAnswers.value = expandedAnswers.value.includes(id)
+    ? expandedAnswers.value.filter((item) => item !== id)
+    : [...expandedAnswers.value, id]
+}
+
+const questionOwnerId = computed(() => question.value?.account.id)
+
+const topLevelAnswers = computed(() => {
+  if (!question.value?.answers) return []
+
+  // Lấy tất cả answer IDs có trong answersInParent
+  const nestedAnswerIds = new Set<number>()
+  const findNestedAnswers = (answers: any[]) => {
+    answers.forEach((answer) => {
+      if (answer.answersInParent?.length) {
+        answer.answersInParent.forEach((nested: any) => {
+          nestedAnswerIds.add(nested.id)
+          findNestedAnswers(nested.answersInParent || [])
+        })
+      }
+    })
+  }
+
+  findNestedAnswers(question.value.answers)
+
+  // Lọc các câu trả lời không bị xóa và không phải là câu trả lời con
+  return question.value.answers.filter((a) => !a.isDeleted && !nestedAnswerIds.has(a.id))
+})
+
+const formatDate = (dateStr: string) =>
+  new Date(dateStr).toLocaleString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+
+const answerForms = ref<Record<number, boolean>>({})
+
+const toggleAnswerFormWithParent = (answerId: number) => {
+  showMainAnswerForm.value = false
+  answerForms.value[answerId] = !answerForms.value[answerId]
+}
+
+// Image viewer
+const imageModal = ref<HTMLElement | null>(null)
+let bsModal: Modal | null = null
+const currentImageIndex = ref<number | null>(null)
+
+const currentImage = computed(() =>
+  currentImageIndex.value !== null
+    ? question.value?.imagesQues?.[currentImageIndex.value] || null
+    : null,
+)
+
+const openImageViewer = (index: number) => {
+  currentImageIndex.value = index
+  if (bsModal) bsModal.show()
+}
+
+const nextImage = () => {
+  if (!question.value || currentImageIndex.value === null) return
+  currentImageIndex.value = (currentImageIndex.value + 1) % question.value.imagesQues.length
+}
+
+const prevImage = () => {
+  if (!question.value || currentImageIndex.value === null) return
+  currentImageIndex.value =
+    (currentImageIndex.value - 1 + question.value.imagesQues.length) %
+    question.value.imagesQues.length
+}
+
+const fetchQuestion = async () => {
+  try {
+    const res = await axios.get<Response>(`http://localhost:8080/question/${questionId}`)
+    if (res.data.status === 1) question.value = res.data.data
+    else error.value = res.data.message || 'Không thể lấy dữ liệu câu hỏi.'
+  } catch (err: any) {
+    error.value = 'Lỗi khi tải dữ liệu: ' + err.message
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchQuestion()
+  if (imageModal.value) bsModal = new Modal(imageModal.value)
+})
+</script>
+
 <template>
-  <div
-    v-if="loading"
-    class="d-flex justify-content-center align-items-center"
-    style="height: 16rem"
-  >
-    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem" role="status">
-      <span class="visually-hidden">Loading...</span>
+  <div class="container py-5">
+    <!-- Loading & Error -->
+    <div v-if="loading" class="text-center py-5">
+      <div class="spinner-border text-primary" style="width: 3rem; height: 3rem"></div>
     </div>
-  </div>
+    <div v-else-if="error" class="alert alert-danger text-center">{{ error }}</div>
 
-  <div v-else-if="error" class="alert alert-danger text-center p-4">
-    {{ error }}
-  </div>
-
-  <div v-else-if="question" class="container my-5">
     <!-- Question Block -->
-    <div class="card mb-4 shadow-sm">
+    <div v-else-if="question" class="card shadow-sm mb-4">
       <div class="card-body">
         <div class="d-flex align-items-center mb-3">
           <img
-            :src="question.account.avatar || 'https://via.placeholder.com/50'"
+            :src="question.account.avatar || 'https://via.placeholder.com/40'"
             alt="Avatar"
             class="rounded-circle me-3"
             style="width: 40px; height: 40px"
           />
           <div>
-            <h6 class="mb-0">{{ question.account.fullname }} (@{{ question.account.username }})</h6>
-            <small class="text-muted">
-              {{ question.createdDate ? formatDate(question.createdDate) : 'No date available' }}
-            </small>
+            <div class="info d-flex align-items-center mb-2">
+              <h4 class="mb-0 text-warning me-2">
+                {{ question.account.fullname }}
+              </h4>
+              <div
+                class="rank d-flex align-items-center"
+                v-html="question.account.reputation.rank.icon"
+              ></div>
+            </div>
+            <small class="text-muted">{{ formatDate(question.createdDate) }}</small>
           </div>
         </div>
-        <h3 class="card-title text-primary mb-3 ms-3">{{ question.title }}</h3>
-        <div class="detail" v-html="question.detail"></div>
 
-        <div v-if="question?.imagesQues?.length" class="d-flex flex-wrap gap-2 mt-3 ms-3">
+        <h4 class="text-primary">{{ question.title }}</h4>
+        <div class="mt-3" v-html="question.detail" />
+
+        <div class="mt-3 d-flex flex-wrap gap-2" v-if="question.imagesQues?.length">
           <img
-            v-for="(image, index) in question.imagesQues"
-            :key="image.id"
-            :src="image.name"
-            alt="Question Image"
-            class="img-fluid rounded"
+            v-for="(img, i) in question.imagesQues"
+            :key="i"
+            :src="img.name"
+            class="rounded"
             style="width: 200px; height: 200px; object-fit: cover; cursor: pointer"
-            @click="openImageViewer(index)"
+            @click="openImageViewer(i)"
           />
         </div>
       </div>
 
-      <div class="border-top pt-3 d-flex flex-wrap justify-content-between align-items-center">
-  <!-- Tags -->
-  <div v-if="question.tags.length" class="mb-2 mb-md-0">
-    <span class="text-muted ms-4">Tags:</span>
-    <span
-      v-for="tag in question.tags"
-      :key="tag.id"
-      class="badge bg-primary text-white ms-2"
-    >
-      {{ tag.name }}
-    </span>
-  </div>
+      <div class="card-footer d-flex justify-content-between flex-wrap">
+        <div>
+          <span v-if="question.tags.length" class="me-2 text-muted">Tags:</span>
+          <span v-for="tag in question.tags" :key="tag.id" class="badge bg-primary me-1">
+            {{ tag.name }}
+          </span>
+        </div>
 
-  <!-- Upvote/Downvote giống component danh sách -->
-  <div class="d-flex align-items-center gap-2 mb-2">
-  <button class="btn btn-outline-success btn-sm d-flex align-items-center gap-1">
-    <i class="fas fa-arrow-up"></i> Upvote
-  </button>
-  <button class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1">
-    <i class="fas fa-arrow-down"></i> Downvote
-  </button>
-  <button class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1">
-    <i class="fas fa-comment"></i> Trả lời
-  </button>
-  <span class="text-muted me-4">Điểm: {{ question.votes || 0 }}</span>
-</div>
+        <div class="d-flex align-items-center gap-2">
+          <button class="btn btn-outline-success btn-sm"><i class="fas fa-arrow-up"></i></button>
+          <button class="btn btn-outline-danger btn-sm"><i class="fas fa-arrow-down"></i></button>
+          <div class="mt-3">
+            <button class="btn btn-outline-primary" @click="toggleMainAnswerForm">
+              {{ showMainAnswerForm ? 'Ẩn form trả lời' : 'Trả lời câu hỏi' }}
+            </button>
 
-</div>
-
+            <transition name="slide-up">
+              <div
+                v-if="showMainAnswerForm"
+                class="answer-form-container shadow-lg p-4 bg-white mt-2"
+              >
+                <AnswerInputComponent
+                  :question-id="question.id"
+                  @submitted="toggleMainAnswerForm"
+                  @cancel="toggleMainAnswerForm"
+                />
+              </div>
+            </transition>
+          </div>
+          <span class="text-muted">Điểm: {{ question.votes }}</span>
+        </div>
+      </div>
     </div>
 
-    <!-- Answers Block -->
+    <!-- Answers -->
     <div class="card shadow-sm">
       <div class="card-body">
-        <h4 class="mb-4">Answers ({{ question.answers.length }})</h4>
-        <div v-if="!question.answers.length" class="text-muted">No answers yet.</div>
+        <h5 class="mb-4">
+          Trả lời
+          <span v-if="question">{{ question.answers.length }}</span>
+          <span v-else>0</span>
+        </h5>
+        <div v-if="!topLevelAnswers.length" class="text-muted">Chưa có câu trả lời nào.</div>
         <div v-else>
-          <AnswerNode
-            v-for="answer in filteredAnswers"
-            :key="answer.id"
-            :answer="answer"
-            :level="0"
-            :account-avatar="question.account.avatar"
-            @toggle="toggleAnswer"
-            :expanded="expandedAnswers"
-          />
+          <div v-for="answer in topLevelAnswers" :key="answer.id" class="mt-3">
+            <AnswerNode
+              :answer="answer"
+              :level="0"
+              :account-avatar="answer.account.avatar"
+              @toggle="toggleAnswer"
+              :expanded="expandedAnswers"
+            />
+
+            <!-- Toggle form trả lời -->
+            <div>
+              <button
+                class="btn btn-outline-primary mt-2 ms-5"
+                @click="toggleAnswerFormWithParent(answer.id)"
+              >
+                {{ answerForms[answer.id] ? 'Ẩn form trả lời' : 'Trả lời' }}
+              </button>
+              <transition name="slide-up">
+                <div
+                  v-if="answerForms[answer.id]"
+                  class="answer-form-container shadow-lg p-4 bg-white"
+                >
+                  <AnswerInputComponent
+                    :question-id="question.id"
+                    :parent-id="answer.id"
+                    @submitted="() => toggleAnswerFormWithParent(answer.id)"
+                    @cancel="() => toggleAnswerFormWithParent(answer.id)"
+                  />
+                </div>
+              </transition>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <div v-else class="text-muted text-center p-4">No question data available.</div>
-
   <!-- Image Viewer Modal -->
-  <div
-    class="modal fade"
-    id="imageViewerModal"
-    tabindex="-1"
-    aria-labelledby="imageViewerModalLabel"
-    aria-hidden="true"
-    ref="imageModal"
-  >
+  <div class="modal fade" ref="imageModal" id="imageViewerModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-lg">
       <div class="modal-content">
-        <div class="modal-body text-center position-relative">
+        <div class="modal-body position-relative text-center">
           <img
             v-if="currentImage"
             :src="currentImage.name"
             class="img-fluid"
-            style="max-height: 70vh"
+            style="max-height: 75vh"
           />
-          <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button
+            type="button"
+            class="btn-close position-absolute top-0 end-0 m-3"
+            data-bs-dismiss="modal"
+          ></button>
           <button
             class="btn btn-secondary position-absolute top-50 start-0 translate-middle-y"
             @click="prevImage"
@@ -133,153 +285,32 @@
           >
             ›
           </button>
-
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref, onMounted, computed } from 'vue'
-import { useRoute } from 'vue-router'
-import axios from 'axios'
-import { Modal } from 'bootstrap'
-import AnswerNode from './AnswerNode.vue'
-import { QuestionDTO, Response } from './types'
-
-export default defineComponent({
-  name: 'QuestionDetail',
-  components: {
-    AnswerNode,
-  },
-  setup() {
-    const route = useRoute()
-    const question = ref<QuestionDTO | null>(null)
-    const loading = ref(true)
-    const error = ref<string | null>(null)
-    const expandedAnswers = ref<number[]>([])
-    const questionId = route.params.id
-
-    const imageModal = ref<HTMLElement | null>(null)
-    let bsModal: Modal | null = null
-    const currentImageIndex = ref<number | null>(null)
-
-    const filteredAnswers = computed(() => {
-      if (!question.value || !question.value.answers) return []
-      return question.value.answers.filter((answer) => answer.isDeleted !== true)
-    })
-
-    const currentImage = computed(() => {
-      if (
-        currentImageIndex.value !== null &&
-        question.value &&
-        question.value.imagesQues &&
-        question.value.imagesQues.length > 0
-      ) {
-        return question.value.imagesQues[currentImageIndex.value]
-      }
-      return null
-    })
-
-    const fetchQuestion = async () => {
-      try {
-        const response = await axios.get<Response>('http://localhost:8080/question/' + questionId)
-        if (response.data.status === 1) {
-          question.value = response.data.data
-        } else {
-          error.value = response.data.message || 'Failed to fetch question'
-        }
-      } catch (err) {
-        error.value = 'Error fetching question: ' + (err as Error).message
-        console.error('Fetch Error:', err)
-      } finally {
-        loading.value = false
-      }
-    }
-
-    const toggleAnswer = (answerId: number) => {
-      if (expandedAnswers.value.includes(answerId)) {
-        expandedAnswers.value = expandedAnswers.value.filter((id) => id !== answerId)
-      } else {
-        expandedAnswers.value.push(answerId)
-      }
-    }
-
-    const formatDate = (date: string) => {
-      return new Date(date).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: 'numeric',
-      })
-    }
-
-    const openImageViewer = (index: number) => {
-      currentImageIndex.value = index
-      if (bsModal) bsModal.show()
-    }
-
-    const nextImage = () => {
-      if (question.value && currentImageIndex.value !== null) {
-        currentImageIndex.value =
-          (currentImageIndex.value + 1) % question.value.imagesQues.length
-      }
-    }
-
-    const prevImage = () => {
-      if (question.value && currentImageIndex.value !== null) {
-        currentImageIndex.value =
-          (currentImageIndex.value - 1 + question.value.imagesQues.length) %
-          question.value.imagesQues.length
-      }
-    }
-
-    onMounted(() => {
-      fetchQuestion()
-      if (imageModal.value) {
-        bsModal = new Modal(imageModal.value)
-      }
-    })
-
-    return {
-      question,
-      loading,
-      error,
-      expandedAnswers,
-      filteredAnswers,
-      toggleAnswer,
-      formatDate,
-      openImageViewer,
-      nextImage,
-      prevImage,
-      currentImage,
-      imageModal,
-    }
-  },
-})
-</script>
-
 <style scoped>
-.card {
-  border-radius: 0.5rem;
-}
-.card-footer {
-  background-color: #f8f9fa;
-}
-.border-top {
-  border-top: 1px solid #dee2e6 !important;
-}
-
-.pt-3 {
-  padding-top: 1rem !important;
+.answer-form-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1050;
+  border-top: 1px solid #dee2e6;
+  background-color: white;
 }
 
-.badge {
-  font-size: 0.75rem;
-  padding: 0.4em 0.6em;
-  border-radius: 0.375rem;
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
 }
-
+.slide-up-enter-from,
+.slide-up-leave-to {
+  transform: translateY(100%);
+  opacity: 0;
+}
 </style>

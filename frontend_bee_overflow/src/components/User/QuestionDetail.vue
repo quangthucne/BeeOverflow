@@ -1,4 +1,3 @@
-<!-- src/components/QuestionDetail.vue -->
 <template>
   <div
     v-if="loading"
@@ -9,9 +8,11 @@
       <span class="visually-hidden">Loading...</span>
     </div>
   </div>
+
   <div v-else-if="error" class="alert alert-danger text-center p-4">
     {{ error }}
   </div>
+
   <div v-else-if="question" class="container my-5">
     <!-- Question Block -->
     <div class="card mb-4 shadow-sm">
@@ -32,23 +33,49 @@
         </div>
         <h3 class="card-title text-primary mb-3 ms-3">{{ question.title }}</h3>
         <div class="detail" v-html="question.detail"></div>
-        <div v-if="question.imagesQues.length" class="d-flex flex-wrap gap-2 mt-3 ms-3">
+
+        <div v-if="question?.imagesQues?.length" class="d-flex flex-wrap gap-2 mt-3 ms-3">
           <img
-            v-for="image in question.imagesQues"
+            v-for="(image, index) in question.imagesQues"
             :key="image.id"
             :src="image.name"
             alt="Question Image"
             class="img-fluid rounded"
-            style="width: 500px; height: 500px; object-fit: cover"
+            style="width: 200px; height: 200px; object-fit: cover; cursor: pointer"
+            @click="openImageViewer(index)"
           />
         </div>
       </div>
-      <div v-if="question.tags.length" class="card-footer bg-light">
-        <span class="text-muted">Tags:</span>
-        <span v-for="tag in question.tags" :key="tag.id" class="badge bg-primary text-white ms-2">
-          {{ tag.name }}
-        </span>
-      </div>
+
+      <div class="border-top pt-3 d-flex flex-wrap justify-content-between align-items-center">
+  <!-- Tags -->
+  <div v-if="question.tags.length" class="mb-2 mb-md-0">
+    <span class="text-muted ms-4">Tags:</span>
+    <span
+      v-for="tag in question.tags"
+      :key="tag.id"
+      class="badge bg-primary text-white ms-2"
+    >
+      {{ tag.name }}
+    </span>
+  </div>
+
+  <!-- Upvote/Downvote giống component danh sách -->
+  <div class="d-flex align-items-center gap-2 mb-2">
+  <button class="btn btn-outline-success btn-sm d-flex align-items-center gap-1">
+    <i class="fas fa-arrow-up"></i> Upvote
+  </button>
+  <button class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1">
+    <i class="fas fa-arrow-down"></i> Downvote
+  </button>
+  <button class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1">
+    <i class="fas fa-comment"></i> Trả lời
+  </button>
+  <span class="text-muted me-4">Điểm: {{ question.votes || 0 }}</span>
+</div>
+
+</div>
+
     </div>
 
     <!-- Answers Block -->
@@ -70,16 +97,56 @@
       </div>
     </div>
   </div>
+
   <div v-else class="text-muted text-center p-4">No question data available.</div>
+
+  <!-- Image Viewer Modal -->
+  <div
+    class="modal fade"
+    id="imageViewerModal"
+    tabindex="-1"
+    aria-labelledby="imageViewerModalLabel"
+    aria-hidden="true"
+    ref="imageModal"
+  >
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-body text-center position-relative">
+          <img
+            v-if="currentImage"
+            :src="currentImage.name"
+            class="img-fluid"
+            style="max-height: 70vh"
+          />
+          <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button
+            class="btn btn-secondary position-absolute top-50 start-0 translate-middle-y"
+            @click="prevImage"
+            v-if="question?.imagesQues?.length > 1"
+          >
+            ‹
+          </button>
+          <button
+            class="btn btn-secondary position-absolute top-50 end-0 translate-middle-y"
+            @click="nextImage"
+            v-if="question?.imagesQues?.length > 1"
+          >
+            ›
+          </button>
+
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, onMounted, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import axios from 'axios'
+import { Modal } from 'bootstrap'
 import AnswerNode from './AnswerNode.vue'
 import { QuestionDTO, Response } from './types'
-import { useRoute } from 'vue-router'
-
 
 export default defineComponent({
   name: 'QuestionDetail',
@@ -94,32 +161,43 @@ export default defineComponent({
     const expandedAnswers = ref<number[]>([])
     const questionId = route.params.id
 
-    // Compute filtered answers to handle isDeleted logic
+    const imageModal = ref<HTMLElement | null>(null)
+    let bsModal: Modal | null = null
+    const currentImageIndex = ref<number | null>(null)
+
     const filteredAnswers = computed(() => {
       if (!question.value || !question.value.answers) return []
       return question.value.answers.filter((answer) => answer.isDeleted !== true)
     })
 
-    // Fetch question data from API
+    const currentImage = computed(() => {
+      if (
+        currentImageIndex.value !== null &&
+        question.value &&
+        question.value.imagesQues &&
+        question.value.imagesQues.length > 0
+      ) {
+        return question.value.imagesQues[currentImageIndex.value]
+      }
+      return null
+    })
+
     const fetchQuestion = async () => {
       try {
-        const response = await axios.get<Response>('http://localhost:8080/question/'+ questionId)
-        console.log('API Response:', response.data) // Debug log
+        const response = await axios.get<Response>('http://localhost:8080/question/' + questionId)
         if (response.data.status === 1) {
           question.value = response.data.data
-          console.log('Question Answers:', question.value?.answers) // Debug log
         } else {
           error.value = response.data.message || 'Failed to fetch question'
         }
       } catch (err) {
         error.value = 'Error fetching question: ' + (err as Error).message
-        console.error('Fetch Error:', err) // Debug log
+        console.error('Fetch Error:', err)
       } finally {
         loading.value = false
       }
     }
 
-    // Toggle answer expansion
     const toggleAnswer = (answerId: number) => {
       if (expandedAnswers.value.includes(answerId)) {
         expandedAnswers.value = expandedAnswers.value.filter((id) => id !== answerId)
@@ -128,7 +206,6 @@ export default defineComponent({
       }
     }
 
-    // Format date using native JavaScript
     const formatDate = (date: string) => {
       return new Date(date).toLocaleDateString('en-US', {
         year: 'numeric',
@@ -139,8 +216,32 @@ export default defineComponent({
       })
     }
 
-    // Fetch data when component is mounted
-    onMounted(fetchQuestion)
+    const openImageViewer = (index: number) => {
+      currentImageIndex.value = index
+      if (bsModal) bsModal.show()
+    }
+
+    const nextImage = () => {
+      if (question.value && currentImageIndex.value !== null) {
+        currentImageIndex.value =
+          (currentImageIndex.value + 1) % question.value.imagesQues.length
+      }
+    }
+
+    const prevImage = () => {
+      if (question.value && currentImageIndex.value !== null) {
+        currentImageIndex.value =
+          (currentImageIndex.value - 1 + question.value.imagesQues.length) %
+          question.value.imagesQues.length
+      }
+    }
+
+    onMounted(() => {
+      fetchQuestion()
+      if (imageModal.value) {
+        bsModal = new Modal(imageModal.value)
+      }
+    })
 
     return {
       question,
@@ -150,6 +251,11 @@ export default defineComponent({
       filteredAnswers,
       toggleAnswer,
       formatDate,
+      openImageViewer,
+      nextImage,
+      prevImage,
+      currentImage,
+      imageModal,
     }
   },
 })
@@ -162,4 +268,18 @@ export default defineComponent({
 .card-footer {
   background-color: #f8f9fa;
 }
+.border-top {
+  border-top: 1px solid #dee2e6 !important;
+}
+
+.pt-3 {
+  padding-top: 1rem !important;
+}
+
+.badge {
+  font-size: 0.75rem;
+  padding: 0.4em 0.6em;
+  border-radius: 0.375rem;
+}
+
 </style>

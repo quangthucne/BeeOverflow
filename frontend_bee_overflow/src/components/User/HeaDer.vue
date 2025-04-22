@@ -39,7 +39,7 @@
             </li>
             <li class="nav-item">
               <a class="nav-link" href="#"
-                ><RouterLink to="/document" class="nav-link">Tài liệu</RouterLink></a
+                ><RouterLink to="/doc" class="nav-link">Tài liệu</RouterLink></a
               >
             </li>
             <li class="nav-item">

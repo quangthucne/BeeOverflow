@@ -1,19 +1,18 @@
 <script setup>
-import DoccuMent from '@/components/User/DocuMent.vue'
 import HeaDer from '@/components/User/HeaDer.vue'
 import FooTer from '@/components/User/FooTer.vue'
+import InputComment from '@/components/User/InputComment.vue';
 </script>
 
 <template>
   <header>
-    <HeaDer></HeaDer>
+    <HeaDer />
   </header>
-
   <main>
-    <DoccuMent />
+<InputComment />
   </main>
 
   <footer>
-    <FooTer></FooTer>
+    <FooTer />
   </footer>
 </template>

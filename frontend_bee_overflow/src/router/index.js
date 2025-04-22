@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
-import DocumentView from '@/views/DocumentView.vue'
 import TagView from '@/views/TagView.vue'
 import ListUserView from '@/views/ListUserView.vue'
 import UserinfoView from '@/views/UserinfoView.vue'
@@ -16,6 +15,8 @@ import UserBlackListView from '@/views/AdminViews/UserBlackListView.vue'
 import QuestionBlackListView from '@/views/AdminViews/QuestionBlackListView.vue'
 import QuestionDetailView from '@/views/QuestionDetailView.vue'
 import DocComponentView from '@/views/DocComponentView.vue'
+import DocInputView from '@/views/AdminViews/DocInputView.vue'
+import InputCommentView from '@/views/InputCommentView.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -48,11 +49,6 @@ const router = createRouter({
       path: '/tag',
       name: 'tag',
       component: TagView,
-    },
-    {
-      path: '/document',
-      name: 'document',
-      component: DocumentView,
     },
     {
       path: '/register',
@@ -108,6 +104,16 @@ const router = createRouter({
       path: '/doc',
       name: 'doc',
       component: DocComponentView,
+    },
+    {
+      path: '/docinput',
+      name: 'docinput',
+      component: DocInputView,
+    },
+    {
+      path: '/inputcomment',
+      name: 'inputcomment',
+      component: InputCommentView,
     },
   ],
 })

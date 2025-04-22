@@ -117,8 +117,22 @@ function goToQuestionDetail(questionId) {
         </div>
 
         <!-- Tiêu đề và nội dung -->
-        <h5 class="text-primary fw-semibold mb-2">{{ question.title }}</h5>
-        <div class="detail mb-3" v-html="question.detail"></div>
+        <!-- Tiêu đề và nội dung -->
+<h5
+  class="text-primary fw-semibold mb-2"
+  @click="goToQuestionDetail(question.id)"
+  style="cursor: pointer"
+>
+  {{ question.title }}
+</h5>
+
+<div
+  class="detail mb-3"
+  v-html="question.detail"
+  @click="goToQuestionDetail(question.id)"
+  style="cursor: pointer"
+></div>
+
 
         <!-- Hình ảnh -->
         <!-- Hình ảnh -->
@@ -186,15 +200,25 @@ function goToQuestionDetail(questionId) {
           </div>
 
           <!-- Upvote/Downvote -->
-          <div class="d-flex align-items-center gap-2">
-            <button class="btn btn-outline-success btn-sm d-flex align-items-center gap-1">
-              <i class="fas fa-arrow-up"></i> Upvote
-            </button>
-            <button class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1">
-              <i class="fas fa-arrow-down"></i> Downvote
-            </button>
-            <span class="text-muted">Điểm: {{ question.votes || 0 }}</span>
-          </div>
+          <!-- Upvote/Downvote -->
+<div class="d-flex align-items-center gap-2">
+  <button class="btn btn-outline-success btn-sm d-flex align-items-center gap-1">
+    <i class="fas fa-arrow-up"></i> Upvote
+  </button>
+  <button class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1">
+    <i class="fas fa-arrow-down"></i> Downvote
+  </button>
+  <span class="text-muted">Điểm: {{ question.votes || 0 }}</span>
+
+  <!-- Nút Bình luận -->
+  <RouterLink
+  :to="`/inputcomment`"
+  class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1"
+>
+  <i class="fas fa-comment-alt"></i> Bình luận
+</RouterLink>
+
+</div>
         </div>
       </div>
     </div>

@@ -7,9 +7,10 @@
       <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
           <h5 class="mb-0">Danh sách Tài liệu</h5>
-          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDocumentModal">
-            <i class="bi bi-plus-lg"></i> Thêm Tài liệu
-          </button>
+          <RouterLink to="/docinput" class="btn btn-primary d-inline-flex align-items-center gap-2">
+  <i class="bi bi-plus-lg"></i>
+  <span>Thêm Tài liệu</span>
+</RouterLink>
         </div>
         <div class="card-body">
           <div class="table-responsive">

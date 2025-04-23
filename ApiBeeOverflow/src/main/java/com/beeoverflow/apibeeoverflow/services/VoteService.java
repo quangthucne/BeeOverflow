@@ -4,6 +4,7 @@ import com.beeoverflow.apibeeoverflow.beans.AnsVoteBean;
 import com.beeoverflow.apibeeoverflow.beans.QuesVoteBean;
 import com.beeoverflow.apibeeoverflow.entities.*;
 import com.beeoverflow.apibeeoverflow.jpas.AnswerVoteJPA;
+import com.beeoverflow.apibeeoverflow.jpas.QuestionJPA;
 import com.beeoverflow.apibeeoverflow.jpas.QuestionVoteJPA;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,9 @@ public class VoteService {
     @Autowired
     ReputationService reputationService;
 
+    @Autowired
+    QuestionJPA questionJPA;
+
 
     // Vote Question Service
     public QuestionVote getQuesVoteById(int id) {
@@ -34,8 +38,9 @@ public class VoteService {
     }
 
     public QuestionVote voteQuestion(QuesVoteBean quesVoteBean, int point) {
-        QuestionVote questionVote = getQuesVoteById(quesVoteBean.getId());
-        Account account = questionVote.getQues().getAccount();
+        Question question = questionJPA.findById(quesVoteBean.getQuestionId());
+        QuestionVote questionVote = getQuesVoteById(question.getId());
+        Account account = question.getAccount();
         questionVote.setCount(questionVote.getCount() + quesVoteBean.getCount());
         QuestionVote newQuesVote = questionVoteJPA.save(questionVote);
         reputationService.update(account, point);

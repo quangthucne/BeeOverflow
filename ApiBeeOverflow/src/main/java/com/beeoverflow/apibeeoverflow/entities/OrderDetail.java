@@ -1,5 +1,7 @@
 package com.beeoverflow.apibeeoverflow.entities;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,6 +18,12 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(name = "order_detail")
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id",
+        scope = OrderDetail.class
+)
+
 public class OrderDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,12 +32,12 @@ public class OrderDetail {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
-    @JsonBackReference
+//    @JsonBackReference
     private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "doc_id")
-    @JsonManagedReference
+//    @JsonManagedReference
     private Document doc;
 
     @Column(name = "price", precision = 10, scale = 2)

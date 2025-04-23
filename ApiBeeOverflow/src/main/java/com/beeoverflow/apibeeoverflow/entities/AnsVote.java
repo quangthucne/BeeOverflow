@@ -1,5 +1,7 @@
 package com.beeoverflow.apibeeoverflow.entities;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,6 +11,12 @@ import org.hibernate.annotations.ColumnDefault;
 @Setter
 @Entity
 @Table(name = "ans_vote")
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id",
+        scope = AnsVote.class
+)
+
 public class AnsVote {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

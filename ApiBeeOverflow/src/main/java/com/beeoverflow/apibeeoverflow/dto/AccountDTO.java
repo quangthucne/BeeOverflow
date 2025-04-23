@@ -1,5 +1,6 @@
 package com.beeoverflow.apibeeoverflow.dto;
 
+import com.beeoverflow.apibeeoverflow.entities.Reputation;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,15 +19,11 @@ public class AccountDTO {
 
     private String fullname;
 
-    private String email;
-
     private String avatar;
-
-    private String phone;
-
-    private int gender;
 
     private Integer point;
 
     private Boolean isActive;
+
+    private Reputation reputation;
 }

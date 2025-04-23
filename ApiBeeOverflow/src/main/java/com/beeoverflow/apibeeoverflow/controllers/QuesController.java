@@ -38,7 +38,7 @@ public class QuesController {
     public ResponseEntity<Response> getQuestionById(@PathVariable int id) {
         Response response = new Response();
         try {
-            Question question = questionService.getByQuestion(id);
+            QuestionDTO question = questionService.getByQuestionDTO(id);
             if (question != null) {
                 response.setData(question);
                 response.setMessage("Success");

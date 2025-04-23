@@ -1,8 +1,6 @@
 package com.beeoverflow.apibeeoverflow.entities;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -21,6 +19,12 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "questions")
+//@JsonIdentityInfo(
+//        generator = ObjectIdGenerators.PropertyGenerator.class,
+//        property = "id",
+//        scope = Question.class
+//)
+
 public class Question {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,19 +52,20 @@ public class Question {
     @Column(name = "is_check")
     private Boolean isCheck;
 
-    @JsonManagedReference
+//    @JsonManagedReference
     @OneToMany(mappedBy = "ques", fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("ques")
     private List<Answer> answers;
 
-    @OneToOne(mappedBy = "ques", fetch = FetchType.LAZY)
-    @JsonManagedReference
-    private QuestionVote questionVotes;
+    @OneToMany(mappedBy = "ques", fetch = FetchType.LAZY)
+//    @JsonManagedReference
+    private List<QuestionVote> questionVotes;
 
-    @JsonManagedReference
+//    @JsonManagedReference
     @OneToMany(mappedBy = "question", fetch = FetchType.LAZY)
     private List<Tag> tags;
 
-    @JsonManagedReference
+//    @JsonManagedReference
     @OneToMany(mappedBy = "ques", fetch = FetchType.LAZY)
     private List<ImagesQue> imagesQues;
 

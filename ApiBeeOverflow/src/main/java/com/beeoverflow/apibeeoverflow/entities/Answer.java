@@ -1,7 +1,6 @@
 package com.beeoverflow.apibeeoverflow.entities;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,6 +14,11 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "answer")
+//@JsonIdentityInfo(
+//        generator = ObjectIdGenerators.PropertyGenerator.class,
+//        property = "id",
+//        scope = Answer.class
+//)
 public class Answer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,11 +28,13 @@ public class Answer {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
     @JsonManagedReference
+    @JsonIgnoreProperties({"answers", "questions"})
     private Account account;
 
-    @JsonBackReference
+//    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ques_id")
+    @JsonIgnoreProperties("answers")
     private Question ques;
 
     @Lob
@@ -44,11 +50,11 @@ public class Answer {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
-    @JsonBackReference
+    @JsonManagedReference
     private Answer parent;
 
-    @OneToMany(mappedBy = "parent")
-    @JsonManagedReference
+    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
+    @JsonBackReference
     private List<Answer> answersInParent;
 
     @OneToMany(mappedBy = "ans")

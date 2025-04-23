@@ -54,6 +54,10 @@ public class QuestionService {
         return questionMapper.questionsToQuestionDTOs(questionJPA.findAll());
     }
 
+    public QuestionDTO getByQuestionDTO(int id) {
+        return questionMapper.questionToQuestionDTO(questionJPA.findById(id));
+    }
+
     public Question getByQuestion(int id) {
         return questionJPA.findById(id);
     }

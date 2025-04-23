@@ -1,10 +1,9 @@
 package com.beeoverflow.apibeeoverflow.services;
 
+import com.beeoverflow.apibeeoverflow.beans.AnsVoteBean;
 import com.beeoverflow.apibeeoverflow.beans.QuesVoteBean;
-import com.beeoverflow.apibeeoverflow.entities.Account;
-import com.beeoverflow.apibeeoverflow.entities.Question;
-import com.beeoverflow.apibeeoverflow.entities.QuestionVote;
-import com.beeoverflow.apibeeoverflow.jpas.QuestionJPA;
+import com.beeoverflow.apibeeoverflow.entities.*;
+import com.beeoverflow.apibeeoverflow.jpas.AnswerVoteJPA;
 import com.beeoverflow.apibeeoverflow.jpas.QuestionVoteJPA;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,11 +15,13 @@ public class VoteService {
     QuestionVoteJPA questionVoteJPA;
 
     @Autowired
-    ReputationService reputationService;
+    AnswerVoteJPA answerVoteJPA;
 
     @Autowired
-    QuestionJPA questionJPA;
+    ReputationService reputationService;
 
+
+    // Vote Question Service
     public QuestionVote getQuesVoteById(int id) {
         return questionVoteJPA.findById(id);
     }
@@ -33,14 +34,33 @@ public class VoteService {
     }
 
     public QuestionVote voteQuestion(QuesVoteBean quesVoteBean, int point) {
-        Question question = questionJPA.findById(quesVoteBean.getQuestionId());
-        QuestionVote questionVote = getQuesVoteById(question.getId());
-
+        QuestionVote questionVote = getQuesVoteById(quesVoteBean.getId());
+        Account account = questionVote.getQues().getAccount();
         questionVote.setCount(questionVote.getCount() + quesVoteBean.getCount());
-        questionVoteJPA.save(questionVote);
-        reputationService.update(question.getAccount(), point);
-        return questionVote;
+        QuestionVote newQuesVote = questionVoteJPA.save(questionVote);
+        reputationService.update(account, point);
+        return newQuesVote;
     }
 
+    // Vote Answer Service
+    public AnsVote getAnsVoteById(int id) {
+        return answerVoteJPA.findById(id);
+    }
+
+    public AnsVote createAnsVote(Answer answer) {
+        AnsVote ansVote = new AnsVote();
+        ansVote.setAns(answer);
+        ansVote.setCount(0);
+        return answerVoteJPA.save(ansVote);
+    }
+
+    public AnsVote voteAnsVote(AnsVoteBean ansVoteBean, int point) {
+        AnsVote ansVote = getAnsVoteById(ansVoteBean.getId());
+        Account account = ansVote.getAns().getAccount();
+        ansVote.setCount(ansVote.getCount() + ansVoteBean.getCount());
+        AnsVote newAnsVote = answerVoteJPA.save(ansVote);
+        reputationService.update(account, point);
+        return newAnsVote;
+    }
 
 }

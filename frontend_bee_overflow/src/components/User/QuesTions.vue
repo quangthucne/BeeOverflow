@@ -4,16 +4,13 @@ import axios from 'axios'
 import Cookies from 'js-cookie'
 import router from '@/router'
 
+// State
 const questions = ref([])
 const accountId = ref(null)
 const selectedImage = ref('')
+const activeDropdown = ref(null)
 
-const token = Cookies.get('token')
-const headers = token ? { Authorization: `Bearer ${token}` } : {}
-
-
-
-
+// Methods
 function openImage(imageUrl) {
   selectedImage.value = imageUrl
 }
@@ -28,89 +25,62 @@ function formatDate(date) {
   })
 }
 
-function getAllQuestions() {
-  axios
-    .get('http://localhost:8080/question')
-    .then((response) => {
-      questions.value = response.data.data
-    })
-    .catch((error) => {
-      console.error(error)
-    })
+async function getAllQuestions() {
+  try {
+    const response = await axios.get('http://localhost:8080/question')
+    questions.value = response.data.data
+  } catch (error) {
+    console.error('Error fetching questions:', error)
+  }
 }
 
 function getAccountIdFromToken() {
   const token = Cookies.get('token')
   if (!token) return null
-
   const payload = JSON.parse(atob(token.split('.')[1]))
   return payload.accountId || payload.id
 }
 
 function handleEdit(questionId) {
   console.log('Edit question', questionId)
+  // Thêm logic edit tại đây
+  router.push('/question/edit/' + questionId)
 }
 
 function handleDelete(questionId) {
   console.log('Delete question', questionId)
+  // Thêm logic delete tại đây
 }
 
-onMounted(() => {
-  accountId.value = getAccountIdFromToken()
-  getAllQuestions()
-})
+function toggleDropdown(questionId) {
+  activeDropdown.value = activeDropdown.value === questionId ? null : questionId
+}
+
+function closeDropdowns() {
+  activeDropdown.value = null
+}
+
 function goToQuestionDetail(questionId) {
-  // Tự sửa lại phần link theo định tuyến của bạn
   router.push(`/question/detail/${questionId}`)
 }
 
-async function voteQuestion(questionId, voteType) {
-  try {
-    const typeMap = {
-      up: 1,
-      down: 0,
-      neutral: -1
+// Lifecycle Hooks
+onMounted(() => {
+  accountId.value = getAccountIdFromToken()
+  getAllQuestions()
+
+  // Đóng dropdown khi click ra ngoài
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.dropdown')) {
+      closeDropdowns()
     }
-
-    const response = await axios.post(
-      'http://localhost:8080/vote/question',
-      {
-        questionId: questionId,
-        type: typeMap[voteType]
-      },
-      { headers }
-    )
-
-    console.log('Response from vote:', JSON.stringify(response.data, null, 2))
-
-    const updatedQuestion = questions.value.find(q => q.id === questionId)
-    if (updatedQuestion) {
-      // Nếu response có updatedVoteCount
-      if (response.data?.updatedVoteCount !== undefined) {
-        updatedQuestion.votes = response.data.updatedVoteCount
-      } else {
-        // Tạm thời tự xử lý vote thủ công nếu không có field updatedVoteCount
-        if (voteType === 'up') updatedQuestion.votes++
-        else if (voteType === 'down') updatedQuestion.votes--
-      }
-    }
-
-  } catch (error) {
-    console.error('Vote thất bại:', error)
-  }
-}
-
-
-
+  })
+})
 </script>
 
 <template>
   <div class="custom-container mt-4">
-    <div
-      class="card mb-4 shadow-sm rounded-4"
-      v-for="(question, index) in questions"
-      :key="question.id"
-    >
+    <div class="card mb-4 shadow-sm rounded-4" v-for="question in questions" :key="question.id">
       <div class="card-body p-4 position-relative">
         <!-- Avatar & User Info -->
         <div class="d-flex align-items-center mb-3">
@@ -130,7 +100,7 @@ async function voteQuestion(questionId, voteType) {
           </div>
         </div>
 
-        <!-- Dropdown -->
+        <!-- Dropdown Menu -->
         <div
           v-if="question.account.id == accountId"
           class="position-absolute top-0 end-0 m-3 dropdown"
@@ -138,15 +108,24 @@ async function voteQuestion(questionId, voteType) {
           <button
             class="btn btn-light btn-sm dropdown-toggle"
             type="button"
-            data-bs-toggle="dropdown"
+            @click.stop="toggleDropdown(question.id)"
             aria-expanded="false"
           >
             <i class="fas fa-ellipsis-v"></i>
           </button>
-          <ul class="dropdown-menu">
+          <ul
+            class="dropdown-menu"
+            :class="{ show: activeDropdown === question.id }"
+            :style="{
+              position: 'absolute',
+              inset: '0px auto auto 0px',
+              margin: '0px',
+              transform: 'translate(0px, 40px)',
+            }"
+          >
             <li>
-              <a class="dropdown-item" href="/" @click.prevent="handleEdit(question.id)">
-                <i class="fas fa-edit me-2 text-primary"></i>Chỉnh sửa
+              <a class="dropdown-item" href="#" @click.prevent="handleEdit(question.id)">
+                <i class="fas fa-edit me-2"></i>Chỉnh sửa
               </a>
             </li>
             <li>
@@ -155,14 +134,13 @@ async function voteQuestion(questionId, voteType) {
                 href="#"
                 @click.prevent="handleDelete(question.id)"
               >
-                <i class="fas fa-trash-alt me-2"></i>Xoá
+                <i class="fas fa-trash me-2"></i>Xoá
               </a>
             </li>
           </ul>
         </div>
 
-        <!-- Tiêu đề và nội dung -->
-        <!-- Tiêu đề và nội dung -->
+        <!-- Question Content -->
         <h5
           class="text-primary fw-semibold mb-2"
           @click="goToQuestionDetail(question.id)"
@@ -178,15 +156,12 @@ async function voteQuestion(questionId, voteType) {
           style="cursor: pointer"
         ></div>
 
-        <!-- Hình ảnh -->
-        <!-- Hình ảnh -->
-        <div v-if="question.imagesQues.length" class="image-grid mb-3">
+        <!-- Images Grid -->
+        <div v-if="question.imagesQues?.length" class="image-grid mb-3">
           <div
             v-for="(image, idx) in question.imagesQues.slice(0, 3)"
             :key="image.id"
             class="image-box position-relative"
-            :data-bs-toggle="idx === 2 && question.imagesQues.length > 3 ? null : 'modal'"
-            :data-bs-target="idx === 2 && question.imagesQues.length > 3 ? null : '#imageModal'"
             @click="
               idx === 2 && question.imagesQues.length > 3
                 ? goToQuestionDetail(question.id)
@@ -199,15 +174,13 @@ async function voteQuestion(questionId, voteType) {
               class="img-fluid rounded border"
               style="width: 100%; height: 100%; object-fit: cover"
             />
-
-            <!-- Overlay nếu là ảnh thứ 3 và còn nhiều ảnh nữa -->
             <div v-if="idx === 2 && question.imagesQues.length > 3" class="overlay">
               +{{ question.imagesQues.length - 3 }} ảnh
             </div>
           </div>
         </div>
 
-        <!-- Modal xem ảnh -->
+        <!-- Image Modal -->
         <div
           class="modal fade"
           id="imageModal"
@@ -229,57 +202,49 @@ async function voteQuestion(questionId, voteType) {
           </div>
         </div>
 
-<!-- Tags và Voting gọn trong footer -->
-<div class="border-top pt-3 d-flex flex-wrap justify-content-between align-items-center">
-  <!-- Tags -->
-  <div v-if="question.tags.length" class="mb-2 mb-md-0">
-    <span class="text-muted">Tags:</span>
-    <span
-      v-for="tag in question.tags"
-      :key="tag.id"
-      class="badge bg-primary text-white ms-2"
-    >
-      {{ tag.name }}
-    </span>
-  </div>
+        <!-- Footer with Tags and Actions -->
+        <div class="border-top pt-3 d-flex flex-wrap justify-content-between align-items-center">
+          <!-- Tags -->
+          <div v-if="question.tags?.length" class="mb-2 mb-md-0">
+            <span class="text-muted">Tags:</span>
+            <span
+              v-for="tag in question.tags"
+              :key="tag.id"
+              class="badge bg-primary text-white ms-2"
+            >
+              {{ tag.name }}
+            </span>
+          </div>
 
-  <!-- Voting + Comment gộp lại trong div -->
-<div class="d-flex align-items-center gap-2">
-  <button
-    class="btn btn-outline-success btn-sm d-flex align-items-center gap-1"
-    @click="voteQuestion(question.id, 'up')"
-  >
-    <i class="fas fa-arrow-up"></i> Upvote
-  </button>
+          <!-- Voting and Comment -->
+          <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-outline-success btn-sm d-flex align-items-center gap-1">
+              <i class="fas fa-arrow-up"></i> Upvote
+            </button>
+            <button class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1">
+              <i class="fas fa-arrow-down"></i> Downvote
+            </button>
+            <span class="text-muted">Điểm: {{ question.votes || 0 }}</span>
 
-  <!-- Hiển thị điểm vote ở giữa -->
-  <span class="fw-semibold px-2 text-secondary">{{ Number(question.questionVotes.count) || 0 }}</span>
-
-
-
-  <button
-    class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1"
-    @click="voteQuestion(question.id, 'down')"
-  >
-    <i class="fas fa-arrow-down"></i> Downvote
-  </button>
-
-  <RouterLink
-    :to="`/inputcomment`"
-    class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1"
-  >
-    <i class="fas fa-comment-alt"></i> Bình luận
-  </RouterLink>
-</div>
-
-</div>
-
+            <button
+              class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1"
+              @click="goToQuestionDetail(question.id)"
+            >
+              <i class="fas fa-comment-alt"></i> Bình luận
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+.custom-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
 .image-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -293,6 +258,11 @@ async function voteQuestion(questionId, voteType) {
   cursor: pointer;
   overflow: hidden;
   border-radius: 8px;
+  transition: transform 0.2s;
+}
+
+.image-box:hover {
+  transform: scale(1.03);
 }
 
 .overlay {
@@ -309,5 +279,26 @@ async function voteQuestion(questionId, voteType) {
   align-items: center;
   justify-content: center;
   border-radius: 8px;
+}
+
+.dropdown-menu {
+  z-index: 1000;
+}
+
+.card {
+  transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.detail {
+  max-height: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
 }
 </style>

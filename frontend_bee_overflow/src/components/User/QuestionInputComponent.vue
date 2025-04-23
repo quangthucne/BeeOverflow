@@ -5,17 +5,13 @@
         <h4 class="mb-0">{{ isEditMode ? 'Edit Question' : 'Add a New Question' }}</h4>
       </div>
       <div class="card-body">
-        <div v-if="successMessage" class="alert alert-success">{{ successMessage }}</div>
-        <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
-
         <form @submit.prevent="submitQuestion">
           <input type="hidden" v-model="form.id" />
           <div class="mb-3">
-            <label for="title" class="form-label">Question Title</label>
+            <label class="form-label">Question Title</label>
             <input
               v-model="form.title"
               type="text"
-              id="title"
               class="form-control"
               placeholder="Enter your question title"
               required
@@ -57,7 +53,6 @@
               placeholder="Select or type tags"
               @tag="addNewTag"
             />
-            <small class="form-text text-muted">Select or create tags, then press Enter.</small>
           </div>
 
           <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
@@ -82,6 +77,7 @@ import { reactive, ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import Cookies from 'js-cookie'
+import Swal from 'sweetalert2'
 
 import InputDetail from './InputDetail.vue'
 import UploadImage from './UploadImage.vue'
@@ -121,8 +117,6 @@ const availableTags = ref<Tag[]>([
 ])
 
 const isSubmitting = ref(false)
-const successMessage = ref<string | null>(null)
-const errorMessage = ref<string | null>(null)
 
 const handleImageUpload = (uploadedUrls: string[]) => {
   const cleaned = uploadedUrls.map((url) => url.replace(/^"+|"+$/g, ''))
@@ -154,28 +148,24 @@ onMounted(async () => {
       form.detail = data.detail
       form.images = data.imagesQues?.map((img: any) => img.name) || []
       form.tags = data.tags || []
-
-      console.log(form)
     } catch (err) {
-      errorMessage.value = 'Failed to load question data.'
+      Swal.fire('Lỗi', 'Không thể tải dữ liệu câu hỏi.', 'error')
     }
   }
 })
 
 const submitQuestion = async () => {
   if (!form.title || !form.detail) {
-    errorMessage.value = 'Please fill in the title and detail.'
+    Swal.fire('Thiếu thông tin', 'Vui lòng điền đầy đủ tiêu đề và nội dung.', 'warning')
     return
   }
 
-  successMessage.value = null
-  errorMessage.value = null
   isSubmitting.value = true
 
   try {
     const token = Cookies.get('token')
     if (!token) {
-      errorMessage.value = 'You must be logged in to submit.'
+      Swal.fire('Phiên đăng nhập hết hạn', 'Vui lòng đăng nhập lại.', 'warning')
       router.push('/login')
       return
     }
@@ -194,46 +184,37 @@ const submitQuestion = async () => {
       ? `http://localhost:8080/question/update`
       : 'http://localhost:8080/question/add'
 
-    const method = 'post'
-
-    const response = await axios({
-      method,
-      url,
-      data: formData,
+    const response = await axios.post(url, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         Authorization: `Bearer ${token}`,
       },
       withCredentials: true,
     })
-      .then
-      // chuyển đến trang chi tiết câu hỏi
-      ()
 
     const { status, message } = response.data
     if (status === 1) {
-      successMessage.value = isEditMode.value
-        ? 'Question updated successfully!'
-        : 'Question submitted successfully!'
-      if (!isEditMode.value) {
-        form.title = ''
-        form.detail = ''
-        form.images = []
-        form.tags = []
-      } else {
-        router.push(`/question/${questionId}`)
-      }
+      await Swal.fire({
+        icon: 'success',
+        title: isEditMode.value ? 'Đã cập nhật' : 'Đã đăng câu hỏi',
+        text: isEditMode.value
+          ? 'Câu hỏi đã được cập nhật thành công.'
+          : 'Câu hỏi đã được đăng thành công.',
+        timer: 2000,
+        showConfirmButton: false,
+      })
+      console.log(isEditMode.value)
+      router.push(isEditMode.value ? `/question/detail/${questionId}` : '/questions')
     } else {
-      errorMessage.value = message || 'Failed to submit question.'
+      Swal.fire('Thất bại', message || 'Không thể gửi câu hỏi.', 'error')
     }
   } catch (err: any) {
     if (err.response?.status === 401) {
-      errorMessage.value = 'Session expired. Please log in again.'
+      Swal.fire('Hết phiên đăng nhập', 'Vui lòng đăng nhập lại.', 'warning')
       Cookies.remove('token')
       router.push('/login')
     } else {
-      errorMessage.value =
-        err.response?.data?.message || err.response?.data?.error || 'Submission error.'
+      Swal.fire('Lỗi', err.response?.data?.message || 'Đã xảy ra lỗi khi gửi.', 'error')
     }
   } finally {
     isSubmitting.value = false

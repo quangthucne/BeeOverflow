@@ -11,14 +11,17 @@ import org.mapstruct.Named;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {AnswerMapper.class, AccountMapper.class})
 public interface QuestionMapper {
-
+    @Mapping(target = "answers", source = "answers")
+    @Mapping(source = "account", target = "account")
     QuestionDTO questionToQuestionDTO(Question question);
 
-    AccountDTO accountToAccountDTO(Account account);
+//    @Named("accountToAccountDTO")
+//    AccountDTO accountToAccountDTO(Account account);
 
     List<QuestionDTO> questionsToQuestionDTOs(List<Question> questions);
+
     List<AccountDTO> accountsToAccountDTOs(List<Account> accounts);
 
 }

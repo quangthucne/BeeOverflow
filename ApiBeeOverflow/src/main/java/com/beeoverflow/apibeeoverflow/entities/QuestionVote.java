@@ -12,11 +12,11 @@ import org.hibernate.annotations.ColumnDefault;
 @Setter
 @Entity
 @Table(name = "question_vote")
-@JsonIdentityInfo(
-        generator = ObjectIdGenerators.PropertyGenerator.class,
-        property = "id",
-        scope = Question.class
-)
+//@JsonIdentityInfo(
+//        generator = ObjectIdGenerators.PropertyGenerator.class,
+//        property = "id",
+//        scope = Question.class
+//)
 
 public class QuestionVote {
     @Id
@@ -24,9 +24,9 @@ public class QuestionVote {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ques_id")
-//    @JsonBackReference
+    @JsonBackReference
     private Question ques;
 
     @ColumnDefault("0")

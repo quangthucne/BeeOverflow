@@ -32,6 +32,7 @@ public class VoteController {
                 point = 3;
                 break;
         }
+        System.out.println("Received voteeeeeeeeeeeeeeeeeeeeeeee: " + quesVoteBean);
         response.setStatus(1);
         response.setMessage("Vote successful");
         response.setData(voteService.voteQuestion(quesVoteBean, point));

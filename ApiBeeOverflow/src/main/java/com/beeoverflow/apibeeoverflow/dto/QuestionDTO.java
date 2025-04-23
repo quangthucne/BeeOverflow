@@ -26,7 +26,7 @@ public class QuestionDTO {
     private Boolean isDeleted;
     private Boolean isCheck;
     private List<AnswerDTO> answers;
-    private List<QuestionVote> questionVotes;
+    private QuestionVote questionVotes;
     private List<Tag> tags;
     private List<ImagesQue> imagesQues;
     private LocalDateTime createdDate;

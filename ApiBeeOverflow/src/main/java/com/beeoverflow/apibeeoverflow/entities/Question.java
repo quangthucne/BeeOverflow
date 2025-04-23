@@ -57,9 +57,9 @@ public class Question {
     @JsonIgnoreProperties("ques")
     private List<Answer> answers;
 
-    @OneToMany(mappedBy = "ques", fetch = FetchType.LAZY)
-//    @JsonManagedReference
-    private List<QuestionVote> questionVotes;
+    @OneToOne(mappedBy = "ques", fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private QuestionVote questionVotes;
 
 //    @JsonManagedReference
     @OneToMany(mappedBy = "question", fetch = FetchType.LAZY)

@@ -15,6 +15,10 @@ function openImage(imageUrl) {
   selectedImage.value = imageUrl
 }
 
+
+const token = Cookies.get('token')
+const headers = token ? { Authorization: `Bearer ${token}` } : {}
+
 function formatDate(date) {
   return new Date(date).toLocaleString('vi-VN', {
     year: 'numeric',
@@ -64,6 +68,42 @@ function goToQuestionDetail(questionId) {
   router.push(`/question/detail/${questionId}`)
 }
 
+async function voteQuestion(questionId, voteType) {
+  try {
+    const typeMap = {
+      up: 1,
+      down: 0,
+      neutral: -1
+    }
+
+    const response = await axios.post(
+      'http://localhost:8080/vote/question',
+      {
+        questionId: questionId,
+        type: typeMap[voteType]
+      },
+      { headers }
+    )
+
+    console.log('Response from vote:', JSON.stringify(response.data, null, 2))
+
+    const updatedQuestion = questions.value.find(q => q.id === questionId)
+    if (updatedQuestion) {
+      // Nếu response có updatedVoteCount
+      if (response.data?.updatedVoteCount !== undefined) {
+        updatedQuestion.votes = response.data.updatedVoteCount
+      } else {
+        // Tạm thời tự xử lý vote thủ công nếu không có field updatedVoteCount
+        if (voteType === 'up') updatedQuestion.votes++
+        else if (voteType === 'down') updatedQuestion.votes--
+      }
+    }
+
+  } catch (error) {
+    console.error('Vote thất bại:', error)
+  }
+}
+
 // Lifecycle Hooks
 onMounted(() => {
   accountId.value = getAccountIdFromToken()
@@ -77,6 +117,7 @@ onMounted(() => {
   })
 })
 </script>
+
 
 <template>
   <div class="custom-container mt-4">
@@ -218,13 +259,19 @@ onMounted(() => {
 
           <!-- Voting and Comment -->
           <div class="d-flex align-items-center gap-2">
-            <button class="btn btn-outline-success btn-sm d-flex align-items-center gap-1">
+            <button
+              class="btn btn-outline-success btn-sm d-flex align-items-center gap-1"
+              @click="voteQuestion(question.id, 'up')"
+            >
               <i class="fas fa-arrow-up"></i> Upvote
             </button>
-            <button class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1">
+            <button
+              class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1"
+              @click="voteQuestion(question.id, 'down')"
+            >
               <i class="fas fa-arrow-down"></i> Downvote
             </button>
-            <span class="text-muted">Điểm: {{ question.votes || 0 }}</span>
+            <span class="text-muted">Điểm: {{ question.questionVotes.count || 0 }}</span>
 
             <button
               class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1"
@@ -238,6 +285,7 @@ onMounted(() => {
     </div>
   </div>
 </template>
+
 
 <style scoped>
 .custom-container {

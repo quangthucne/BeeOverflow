@@ -17,6 +17,9 @@
         </div>
       </div>
     </div>
+    <div v-if="error" class="text-danger mt-2 error-message">
+      {{ error }}
+    </div>
   </div>
 </template>
 
@@ -27,6 +30,7 @@ import { Ckeditor, useCKEditorCloud } from '@ckeditor/ckeditor5-vue'
 const props = defineProps<{
   modelValue: string
   content: string
+  error: string
 }>()
 
 const emit = defineEmits<{

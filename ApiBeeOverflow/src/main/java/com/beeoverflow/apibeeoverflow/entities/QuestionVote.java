@@ -1,6 +1,8 @@
 package com.beeoverflow.apibeeoverflow.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,6 +12,12 @@ import org.hibernate.annotations.ColumnDefault;
 @Setter
 @Entity
 @Table(name = "question_vote")
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id",
+        scope = Question.class
+)
+
 public class QuestionVote {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,7 +26,7 @@ public class QuestionVote {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ques_id")
-    @JsonBackReference
+//    @JsonBackReference
     private Question ques;
 
     @ColumnDefault("0")

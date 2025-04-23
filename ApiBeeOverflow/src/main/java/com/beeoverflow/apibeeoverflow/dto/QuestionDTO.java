@@ -20,27 +20,15 @@ import java.util.Set;
 public class QuestionDTO {
 
     private Integer id;
-
     private AccountDTO account;
-
     private String title;
-
     private String detail;
-
     private Boolean isDeleted;
-
     private Boolean isCheck;
-
-    private List<Answer> answers;
-
+    private List<AnswerDTO> answers;
     private List<QuestionVote> questionVotes;
-
     private List<Tag> tags;
-
-    private ImagesQue images;
-
     private List<ImagesQue> imagesQues;
-
     private LocalDateTime createdDate;
 
 }

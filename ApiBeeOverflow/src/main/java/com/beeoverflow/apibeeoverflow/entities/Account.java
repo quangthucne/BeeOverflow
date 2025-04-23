@@ -1,8 +1,6 @@
 package com.beeoverflow.apibeeoverflow.entities;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -20,6 +18,12 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "account")
+//@JsonIdentityInfo(
+//        generator = ObjectIdGenerators.PropertyGenerator.class,
+//        property = "id",
+//        scope = Account.class
+//)
+
 public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -90,15 +94,15 @@ public class Account {
     }
 
     @JsonBackReference
-    @OneToMany(mappedBy = "account")
+    @OneToMany(mappedBy = "account", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Answer> answers;
 
     @OneToMany(mappedBy = "account")
-    @JsonManagedReference
+//    @JsonManagedReference
     private Set<Document> documents = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "account")
-    @JsonManagedReference
+//    @JsonManagedReference
     private Set<Order> orders = new LinkedHashSet<>();
 
     @JsonBackReference
@@ -106,7 +110,8 @@ public class Account {
     private List<Question> questions;
 
     @OneToOne(mappedBy = "account", fetch = FetchType.LAZY)
-    @JsonManagedReference
+//    @JsonManagedReference
+//    @JsonIgnoreProperties("account")
     private Reputation reputation;
 
     @NotNull

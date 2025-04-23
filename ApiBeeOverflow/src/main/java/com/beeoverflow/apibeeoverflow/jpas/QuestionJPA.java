@@ -1,5 +1,6 @@
 package com.beeoverflow.apibeeoverflow.jpas;
 
+import com.beeoverflow.apibeeoverflow.dto.QuestionDTO;
 import com.beeoverflow.apibeeoverflow.entities.Question;
 import org.springframework.data.jpa.repository.JpaRepository;
 

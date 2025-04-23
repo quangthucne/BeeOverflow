@@ -27,6 +27,9 @@ public class AnswerService {
     ImageService imageService;
 
     @Autowired
+    VoteService voteService;
+
+    @Autowired
     CookiesUtil cookiesUtil;
 
     @Autowired
@@ -51,6 +54,8 @@ public class AnswerService {
         }
 
         Answer newAns = answerJPA.save(answer);
+
+        voteService.createAnsVote(newAns);
 
         if(answerBean.getImages() != null) {
             imageService.saveImagesAns(answerBean.getImages(), newAns);

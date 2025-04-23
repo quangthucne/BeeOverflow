@@ -28,8 +28,9 @@ const props = defineProps({
 const emit = defineEmits(['success', 'cancel'])
 
 const content = ref(props.initialContent || '')
+const contentError = ref('')
 const isSubmitting = ref(false)
-const imageFiles = ref<File[]>([]) // Sử dụng File thay vì URL
+const imageFiles = ref<File[]>([])
 
 watch(
   () => props.initialContent,
@@ -43,12 +44,10 @@ const handleImageUpload = (files: File[]) => {
 }
 
 const submit = async () => {
+  contentError.value = ''
+
   if (!content.value.trim()) {
-    Swal.fire({
-      icon: 'warning',
-      title: 'Vui lòng nhập nội dung câu trả lời!',
-      confirmButtonText: 'OK',
-    })
+    contentError.value = 'Vui lòng nhập nội dung câu trả lời!'
     return
   }
 
@@ -66,15 +65,16 @@ const submit = async () => {
     }
 
     const formData = new FormData()
+    if (props.answerId) {
+      formData.append('id', props.answerId.toString())
+    }
     formData.append('questionId', props.questionId.toString())
     formData.append('detail', content.value)
 
-    // Thêm parentId nếu có
     if (props.parentId) {
       formData.append('parentId', props.parentId.toString())
     }
 
-    // Thêm các file ảnh
     imageFiles.value.forEach((file) => {
       formData.append('images', file)
     })
@@ -88,15 +88,13 @@ const submit = async () => {
 
     let response
     if (props.answerId) {
-      // Cập nhật câu trả lời
-      response = await axios.put(`http://localhost:8080/answer/${props.answerId}`, formData, config)
+      response = await axios.post(`http://localhost:8080/answer/update`, formData, config)
       Swal.fire({
         icon: 'success',
         title: 'Cập nhật câu trả lời thành công!',
         confirmButtonText: 'OK',
       })
     } else {
-      // Thêm câu trả lời mới
       response = await axios.post('http://localhost:8080/answer/add', formData, config)
       Swal.fire({
         icon: 'success',
@@ -129,7 +127,7 @@ const submit = async () => {
 
       <!-- Nội dung trả lời -->
       <div class="mb-3">
-        <InputDetail v-model:content="content" />
+        <InputDetail v-model:content="content" :error="contentError" />
       </div>
 
       <!-- Hình ảnh -->
@@ -139,7 +137,7 @@ const submit = async () => {
           <img
             v-for="(file, i) in imageFiles"
             :key="i"
-            :src="URL.createObjectURL(file)"
+            :src="file"
             alt="Image Preview"
             class="img-fluid rounded"
             style="max-width: 150px; max-height: 150px; object-fit: cover"

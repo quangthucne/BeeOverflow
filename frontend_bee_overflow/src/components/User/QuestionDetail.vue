@@ -1,132 +1,3 @@
-<script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import axios from 'axios'
-import { Modal } from 'bootstrap'
-import AnswerNode from './AnswerNode.vue'
-import AnswerInputComponent from './AnswerInputComponent.vue'
-import { QuestionDTO, Response } from './types'
-import Cookies from 'js-cookie'
-
-const route = useRoute()
-const question = ref<QuestionDTO | null>(null)
-const loading = ref(true)
-const error = ref<string | null>(null)
-const expandedAnswers = ref<number[]>([])
-const questionId = route.params.id
-
-const showMainAnswerForm = ref(false)
-const toggleMainAnswerForm = () => {
-  showMainAnswerForm.value = !showMainAnswerForm.value
-  // Đóng tất cả các form trả lời cho câu trả lời khác
-  Object.keys(answerForms.value).forEach((key) => {
-    answerForms.value[key] = false
-  })
-}
-
-// Lấy accountId từ token
-const accountId = getAccountIdFromToken()
-console.log('accountid: ' + accountId)
-function getAccountIdFromToken() {
-  const token = Cookies.get('token')
-  if (!token) return null
-
-  const payload = JSON.parse(atob(token.split('.')[1]))
-  return payload.accountId || payload.id
-}
-
-const toggleAnswer = (id: number) => {
-  expandedAnswers.value = expandedAnswers.value.includes(id)
-    ? expandedAnswers.value.filter((item) => item !== id)
-    : [...expandedAnswers.value, id]
-}
-
-const questionOwnerId = computed(() => question.value?.account.id)
-
-const topLevelAnswers = computed(() => {
-  if (!question.value?.answers) return []
-
-  // Lấy tất cả answer IDs có trong answersInParent
-  const nestedAnswerIds = new Set<number>()
-  const findNestedAnswers = (answers: any[]) => {
-    answers.forEach((answer) => {
-      if (answer.answersInParent?.length) {
-        answer.answersInParent.forEach((nested: any) => {
-          nestedAnswerIds.add(nested.id)
-          findNestedAnswers(nested.answersInParent || [])
-        })
-      }
-    })
-  }
-
-  findNestedAnswers(question.value.answers)
-
-  // Lọc các câu trả lời không bị xóa và không phải là câu trả lời con
-  return question.value.answers.filter((a) => !a.isDeleted && !nestedAnswerIds.has(a.id))
-})
-
-const formatDate = (dateStr: string) =>
-  new Date(dateStr).toLocaleString('vi-VN', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-
-const answerForms = ref<Record<number, boolean>>({})
-
-const toggleAnswerFormWithParent = (answerId: number) => {
-  showMainAnswerForm.value = false
-  answerForms.value[answerId] = !answerForms.value[answerId]
-}
-
-// Image viewer
-const imageModal = ref<HTMLElement | null>(null)
-let bsModal: Modal | null = null
-const currentImageIndex = ref<number | null>(null)
-
-const currentImage = computed(() =>
-  currentImageIndex.value !== null
-    ? question.value?.imagesQues?.[currentImageIndex.value] || null
-    : null,
-)
-
-const openImageViewer = (index: number) => {
-  currentImageIndex.value = index
-  if (bsModal) bsModal.show()
-}
-
-const nextImage = () => {
-  if (!question.value || currentImageIndex.value === null) return
-  currentImageIndex.value = (currentImageIndex.value + 1) % question.value.imagesQues.length
-}
-
-const prevImage = () => {
-  if (!question.value || currentImageIndex.value === null) return
-  currentImageIndex.value =
-    (currentImageIndex.value - 1 + question.value.imagesQues.length) %
-    question.value.imagesQues.length
-}
-
-const fetchQuestion = async () => {
-  try {
-    const res = await axios.get<Response>(`http://localhost:8080/question/${questionId}`)
-    if (res.data.status === 1) question.value = res.data.data
-    else error.value = res.data.message || 'Không thể lấy dữ liệu câu hỏi.'
-  } catch (err: any) {
-    error.value = 'Lỗi khi tải dữ liệu: ' + err.message
-  } finally {
-    loading.value = false
-  }
-}
-
-onMounted(() => {
-  fetchQuestion()
-  if (imageModal.value) bsModal = new Modal(imageModal.value)
-})
-</script>
-
 <template>
   <div class="container py-5">
     <!-- Loading & Error -->
@@ -223,8 +94,12 @@ onMounted(() => {
               :answer="answer"
               :level="0"
               :account-avatar="answer.account.avatar"
-              @toggle="toggleAnswer"
+              :current-account-id="accountId"
+              :edit-forms="answerForms"
               :expanded="expandedAnswers"
+              @toggle="toggleAnswer"
+              @edit="editAnswer"
+              @delete="deleteAnswer"
             />
 
             <!-- Toggle form trả lời -->
@@ -290,6 +165,134 @@ onMounted(() => {
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import axios from 'axios'
+import { Modal } from 'bootstrap'
+import AnswerNode from './AnswerNode.vue'
+import AnswerInputComponent from './AnswerInputComponent.vue'
+import { QuestionDTO, Response } from './types'
+import Cookies from 'js-cookie'
+
+const route = useRoute()
+const question = ref<QuestionDTO | null>(null)
+const loading = ref(true)
+const error = ref<string | null>(null)
+const expandedAnswers = ref<number[]>([])
+const questionId = route.params.id
+
+const showMainAnswerForm = ref(false)
+const toggleMainAnswerForm = () => {
+  showMainAnswerForm.value = !showMainAnswerForm.value
+  // Đóng tất cả các form trả lời cho câu trả lời khác
+  Object.keys(answerForms.value).forEach((key) => {
+    answerForms.value[key] = false
+  })
+}
+
+// Lấy accountId từ token
+const accountId = getAccountIdFromToken()
+console.log('accountid: ' + accountId)
+function getAccountIdFromToken() {
+  const token = Cookies.get('token')
+  if (!token) return null
+
+  const payload = JSON.parse(atob(token.split('.')[1]))
+  return payload.accountId || payload.id
+}
+
+const toggleAnswer = (id: number) => {
+  expandedAnswers.value = expandedAnswers.value.includes(id)
+    ? expandedAnswers.value.filter((item) => item !== id)
+    : [...expandedAnswers.value, id]
+}
+
+const questionOwnerId = computed(() => question.value?.account.id)
+
+const topLevelAnswers = computed(() => {
+  if (!question.value?.answers) return []
+
+  // Lấy tất cả answer IDs có trong answersInParent
+  const nestedAnswerIds = new Set<number>()
+  const findNestedAnswers = (answers: any[]) => {
+    answers.forEach((answer) => {
+      if (answer.answersInParent?.length) {
+        answer.answersInParent.forEach((nested: any) => {
+          nestedAnswerIds.add(nested.id)
+          findNestedAnswers(nested.answersInParent || [])
+        })
+      }
+    })
+  }
+
+  findNestedAnswers(question.value.answers)
+
+  // Lọc các câu trả lời không bị xóa và không phải là câu trả lời con
+  return question.value.answers.filter((a) => !a.isDeleted && !nestedAnswerIds.has(a.id))
+})
+
+const formatDate = (dateStr: string) =>
+  new Date(dateStr).toLocaleString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+
+const answerForms = ref<Record<number, boolean>>({})
+
+const toggleAnswerFormWithParent = (answerId: number) => {
+  answerForms.value[answerId] = !answerForms.value[answerId]
+}
+
+// Image viewer
+const imageModal = ref<HTMLElement | null>(null)
+let bsModal: Modal | null = null
+const currentImageIndex = ref<number | null>(null)
+
+const currentImage = computed(() =>
+  currentImageIndex.value !== null
+    ? question.value?.imagesQues?.[currentImageIndex.value] || null
+    : null,
+)
+
+const openImageViewer = (index: number) => {
+  currentImageIndex.value = index
+  if (bsModal) bsModal.show()
+}
+
+const nextImage = () => {
+  if (!question.value || currentImageIndex.value === null) return
+  currentImageIndex.value = (currentImageIndex.value + 1) % question.value.imagesQues.length
+}
+
+const prevImage = () => {
+  if (!question.value || currentImageIndex.value === null) return
+  currentImageIndex.value =
+    (currentImageIndex.value - 1 + question.value.imagesQues.length) %
+    question.value.imagesQues.length
+}
+
+const fetchQuestion = async () => {
+  try {
+    const res = await axios.get<Response>(`http://localhost:8080/question/${questionId}`)
+    if (res.data.status === 1) question.value = res.data.data
+    else error.value = res.data.message || 'Không thể lấy dữ liệu câu hỏi.'
+  } catch (err: any) {
+    error.value = 'Lỗi khi tải dữ liệu: ' + err.message
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchQuestion()
+  if (imageModal.value) bsModal = new Modal(imageModal.value)
+})
+</script>
 
 <style scoped>
 .answer-form-container {

@@ -1,6 +1,8 @@
 package com.beeoverflow.apibeeoverflow.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -10,6 +12,12 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "ranking")
+//@JsonIdentityInfo(
+//        generator = ObjectIdGenerators.PropertyGenerator.class,
+//        property = "id",
+//        scope = Ranking.class
+//)
+
 public class Ranking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

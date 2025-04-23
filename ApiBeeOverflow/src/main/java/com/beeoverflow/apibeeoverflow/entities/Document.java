@@ -1,5 +1,7 @@
 package com.beeoverflow.apibeeoverflow.entities;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -15,6 +17,11 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 @Setter
 @Entity
 @Table(name = "document")
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id"
+)
+
 public class Document {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,17 +30,17 @@ public class Document {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "doc_detail_id")
-    @JsonManagedReference
+//    @JsonManagedReference
     private DocumentDetail docDetail;
 
     @OneToMany(mappedBy = "doc")
-    @JsonBackReference
+//    @JsonBackReference
     private Set<OrderDetail> orderDetails = new LinkedHashSet<>();
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "account_id", nullable = false)
-    @JsonBackReference
+//    @JsonBackReference
     private Account account;
 
 }

@@ -52,9 +52,9 @@ public class Question {
     @OneToMany(mappedBy = "ques", fetch = FetchType.LAZY)
     private List<Answer> answers;
 
-    @OneToMany(mappedBy = "ques", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "ques", fetch = FetchType.LAZY)
     @JsonManagedReference
-    private List<QuestionVote> questionVotes;
+    private QuestionVote questionVotes;
 
     @JsonManagedReference
     @OneToMany(mappedBy = "question", fetch = FetchType.LAZY)

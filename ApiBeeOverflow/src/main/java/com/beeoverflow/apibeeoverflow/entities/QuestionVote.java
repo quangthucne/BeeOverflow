@@ -16,7 +16,7 @@ public class QuestionVote {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ques_id")
     @JsonBackReference
     private Question ques;

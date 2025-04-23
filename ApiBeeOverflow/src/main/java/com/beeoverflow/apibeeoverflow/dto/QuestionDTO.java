@@ -33,7 +33,7 @@ public class QuestionDTO {
 
     private List<Answer> answers;
 
-    private List<QuestionVote> questionVotes;
+    private QuestionVote questionVotes;
 
     private List<Tag> tags;
 

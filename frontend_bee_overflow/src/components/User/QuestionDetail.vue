@@ -125,6 +125,76 @@ onMounted(() => {
   fetchQuestion()
   if (imageModal.value) bsModal = new Modal(imageModal.value)
 })
+
+const token = Cookies.get('token')
+const headers = token ? { Authorization: `Bearer ${token}` } : {}
+
+async function voteQuestion(questionId: number, voteType: 'up' | 'down' | 'neutral') {
+  try {
+    const typeMap = {
+      up: 1,
+      down: 0,
+      neutral: -1
+    }
+
+    const response = await axios.post(
+      'http://localhost:8080/vote/question',
+      {
+        questionId,
+        type: typeMap[voteType]
+      },
+      { headers }
+    )
+
+    console.log('Vote response:', response.data)
+
+    // Cập nhật điểm vote trực tiếp nếu có
+    if (question.value && response.data?.updatedVoteCount !== undefined) {
+      question.value.votes = response.data.updatedVoteCount
+    } else if (question.value) {
+  if (voteType === 'up') question.value.votes = (question.value.votes || 0) + 1
+  else if (voteType === 'down') question.value.votes = (question.value.votes || 0) - 1
+}
+
+  } catch (error) {
+    console.error('Vote thất bại:', error)
+  }
+}
+async function voteAnswer(answerId: number, voteType: 'up' | 'down' | 'neutral') {
+  try {
+    const typeMap = {
+      up: 1,
+      down: 0,
+      neutral: -1,
+    }
+
+    const response = await axios.post(
+      'http://localhost:8080/vote/answer',
+      {
+        answerId,
+        type: typeMap[voteType],
+      },
+      { headers }
+    )
+
+    const updated = response.data.updatedVoteCount
+    if (question.value?.answers) {
+      const answer = question.value.answers.find((a) => a.id === answerId)
+      if (answer) {
+        if (updated !== undefined) {
+          answer.votes = updated
+        } else {
+          if (voteType === 'up') answer.votes++
+          else if (voteType === 'down') answer.votes--
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Vote answer thất bại:', error)
+  }
+}
+
+
 </script>
 
 <template>
@@ -183,10 +253,26 @@ onMounted(() => {
         </div>
 
         <div class="d-flex align-items-center gap-2">
-          <button class="btn btn-outline-success btn-sm"><i class="fas fa-arrow-up"></i></button>
-          <button class="btn btn-outline-danger btn-sm"><i class="fas fa-arrow-down"></i></button>
+          <div class="d-flex align-items-center gap-2">
+  <button
+    class="btn btn-outline-success btn-sm"
+    @click="voteQuestion(question.id, 'up')"
+  >
+    <i class="fas fa-arrow-up"></i> Upvote
+  </button>
+
+  <span class="fw-semibold px-2 text-secondary">{{ question.questionVotes.count || 0 }}</span>
+
+  <butto
+    class="btn btn-outline-danger btn-sm"
+    @click="voteQuestion(question.id, 'down')"
+  >
+    <i class="fas fa-arrow-down"></i> Downvote
+  </butto>
+</div>
+
           <div class="mt-3">
-            <button class="btn btn-outline-primary" @click="toggleMainAnswerForm">
+            <button class="btn btn-outline-primary mb-3" @click="toggleMainAnswerForm">
               {{ showMainAnswerForm ? 'Ẩn form trả lời' : 'Trả lời câu hỏi' }}
             </button>
 
@@ -203,56 +289,71 @@ onMounted(() => {
               </div>
             </transition>
           </div>
-          <span class="text-muted">Điểm: {{ question.votes }}</span>
         </div>
       </div>
     </div>
 
-    <!-- Answers -->
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <h5 class="mb-4">
-          Trả lời
-          <span v-if="question">{{ question.answers.length }}</span>
-          <span v-else>0</span>
-        </h5>
-        <div v-if="!topLevelAnswers.length" class="text-muted">Chưa có câu trả lời nào.</div>
-        <div v-else>
-          <div v-for="answer in topLevelAnswers" :key="answer.id" class="mt-3">
-            <AnswerNode
-              :answer="answer"
-              :level="0"
-              :account-avatar="answer.account.avatar"
-              @toggle="toggleAnswer"
-              :expanded="expandedAnswers"
-            />
+    <div v-for="answer in topLevelAnswers" :key="answer.id" class="mt-3 border-bottom pb-3">
+  <!-- Phần hiển thị nội dung câu trả lời -->
+  <AnswerNode
+    :answer="answer"
+    :level="0"
+    :account-avatar="answer.account.avatar"
+    @toggle="toggleAnswer"
+    :expanded="expandedAnswers"
+  />
 
-            <!-- Toggle form trả lời -->
-            <div>
-              <button
-                class="btn btn-outline-primary mt-2 ms-5"
-                @click="toggleAnswerFormWithParent(answer.id)"
-              >
-                {{ answerForms[answer.id] ? 'Ẩn form trả lời' : 'Trả lời' }}
-              </button>
-              <transition name="slide-up">
-                <div
-                  v-if="answerForms[answer.id]"
-                  class="answer-form-container shadow-lg p-4 bg-white"
-                >
-                  <AnswerInputComponent
-                    :question-id="question.id"
-                    :parent-id="answer.id"
-                    @submitted="() => toggleAnswerFormWithParent(answer.id)"
-                    @cancel="() => toggleAnswerFormWithParent(answer.id)"
-                  />
-                </div>
-              </transition>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <!-- Vote Answer -->
+  <div class="d-flex justify-content-between align-items-center ms-5 mt-2">
+  <!-- Nút trả lời bên trái -->
+  <div>
+    <button
+      class="btn btn-outline-primary"
+      @click="toggleAnswerFormWithParent(answer.id)"
+    >
+      {{ answerForms[answer.id] ? 'Ẩn form trả lời' : 'Trả lời' }}
+    </button>
+  </div>
+
+  <!-- Vote bên phải -->
+  <div class="d-flex align-items-center gap-2">
+    <button
+      class="btn btn-outline-success btn-sm"
+      @click="voteAnswer(answer.id, 'up')"
+    >
+      <i class="fas fa-arrow-up"></i> Upvote
+    </button>
+
+    <span class="fw-semibold px-2 text-secondary">
+      {{ answer.votes || 0 }}
+    </span>
+
+    <button
+      class="btn btn-outline-danger btn-sm"
+      @click="voteAnswer(answer.id, 'down')"
+    >
+      <i class="fas fa-arrow-down"></i> Downvote
+    </button>
+  </div>
+</div>
+
+<!-- Form trả lời -->
+<transition name="slide-up">
+  <div
+    v-if="answerForms[answer.id]"
+    class="answer-form-container shadow-lg p-4 bg-white"
+  >
+    <AnswerInputComponent
+      :question-id="question.id"
+      :parent-id="answer.id"
+      @submitted="() => toggleAnswerFormWithParent(answer.id)"
+      @cancel="() => toggleAnswerFormWithParent(answer.id)"
+    />
+  </div>
+</transition>
+
+</div>
+
   </div>
 
   <!-- Image Viewer Modal -->

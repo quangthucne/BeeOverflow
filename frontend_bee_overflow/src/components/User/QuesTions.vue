@@ -8,6 +8,12 @@ const questions = ref([])
 const accountId = ref(null)
 const selectedImage = ref('')
 
+const token = Cookies.get('token')
+const headers = token ? { Authorization: `Bearer ${token}` } : {}
+
+
+
+
 function openImage(imageUrl) {
   selectedImage.value = imageUrl
 }
@@ -57,6 +63,45 @@ function goToQuestionDetail(questionId) {
   // Tự sửa lại phần link theo định tuyến của bạn
   router.push(`/question/detail/${questionId}`)
 }
+
+async function voteQuestion(questionId, voteType) {
+  try {
+    const typeMap = {
+      up: 1,
+      down: 0,
+      neutral: -1
+    }
+
+    const response = await axios.post(
+      'http://localhost:8080/vote/question',
+      {
+        questionId: questionId,
+        type: typeMap[voteType]
+      },
+      { headers }
+    )
+
+    console.log('Response from vote:', JSON.stringify(response.data, null, 2))
+
+    const updatedQuestion = questions.value.find(q => q.id === questionId)
+    if (updatedQuestion) {
+      // Nếu response có updatedVoteCount
+      if (response.data?.updatedVoteCount !== undefined) {
+        updatedQuestion.votes = response.data.updatedVoteCount
+      } else {
+        // Tạm thời tự xử lý vote thủ công nếu không có field updatedVoteCount
+        if (voteType === 'up') updatedQuestion.votes++
+        else if (voteType === 'down') updatedQuestion.votes--
+      }
+    }
+
+  } catch (error) {
+    console.error('Vote thất bại:', error)
+  }
+}
+
+
+
 </script>
 
 <template>
@@ -118,21 +163,20 @@ function goToQuestionDetail(questionId) {
 
         <!-- Tiêu đề và nội dung -->
         <!-- Tiêu đề và nội dung -->
-<h5
-  class="text-primary fw-semibold mb-2"
-  @click="goToQuestionDetail(question.id)"
-  style="cursor: pointer"
->
-  {{ question.title }}
-</h5>
+        <h5
+          class="text-primary fw-semibold mb-2"
+          @click="goToQuestionDetail(question.id)"
+          style="cursor: pointer"
+        >
+          {{ question.title }}
+        </h5>
 
-<div
-  class="detail mb-3"
-  v-html="question.detail"
-  @click="goToQuestionDetail(question.id)"
-  style="cursor: pointer"
-></div>
-
+        <div
+          class="detail mb-3"
+          v-html="question.detail"
+          @click="goToQuestionDetail(question.id)"
+          style="cursor: pointer"
+        ></div>
 
         <!-- Hình ảnh -->
         <!-- Hình ảnh -->
@@ -185,41 +229,51 @@ function goToQuestionDetail(questionId) {
           </div>
         </div>
 
-        <!-- Tags và Voting gọn trong footer -->
-        <div class="border-top pt-3 d-flex flex-wrap justify-content-between align-items-center">
-          <!-- Tags -->
-          <div v-if="question.tags.length" class="mb-2 mb-md-0">
-            <span class="text-muted">Tags:</span>
-            <span
-              v-for="tag in question.tags"
-              :key="tag.id"
-              class="badge bg-primary text-white ms-2"
-            >
-              {{ tag.name }}
-            </span>
-          </div>
+<!-- Tags và Voting gọn trong footer -->
+<div class="border-top pt-3 d-flex flex-wrap justify-content-between align-items-center">
+  <!-- Tags -->
+  <div v-if="question.tags.length" class="mb-2 mb-md-0">
+    <span class="text-muted">Tags:</span>
+    <span
+      v-for="tag in question.tags"
+      :key="tag.id"
+      class="badge bg-primary text-white ms-2"
+    >
+      {{ tag.name }}
+    </span>
+  </div>
 
-          <!-- Upvote/Downvote -->
-          <!-- Upvote/Downvote -->
+  <!-- Voting + Comment gộp lại trong div -->
 <div class="d-flex align-items-center gap-2">
-  <button class="btn btn-outline-success btn-sm d-flex align-items-center gap-1">
+  <button
+    class="btn btn-outline-success btn-sm d-flex align-items-center gap-1"
+    @click="voteQuestion(question.id, 'up')"
+  >
     <i class="fas fa-arrow-up"></i> Upvote
   </button>
-  <button class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1">
+
+  <!-- Hiển thị điểm vote ở giữa -->
+  <span class="fw-semibold px-2 text-secondary">{{ Number(question.questionVotes.count) || 0 }}</span>
+
+
+
+  <button
+    class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1"
+    @click="voteQuestion(question.id, 'down')"
+  >
     <i class="fas fa-arrow-down"></i> Downvote
   </button>
-  <span class="text-muted">Điểm: {{ question.votes || 0 }}</span>
 
-  <!-- Nút Bình luận -->
   <RouterLink
-  :to="`/inputcomment`"
-  class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1"
->
-  <i class="fas fa-comment-alt"></i> Bình luận
-</RouterLink>
+    :to="`/inputcomment`"
+    class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1"
+  >
+    <i class="fas fa-comment-alt"></i> Bình luận
+  </RouterLink>
+</div>
 
 </div>
-        </div>
+
       </div>
     </div>
   </div>

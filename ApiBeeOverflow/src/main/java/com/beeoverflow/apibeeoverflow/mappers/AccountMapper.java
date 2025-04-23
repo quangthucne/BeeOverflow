@@ -11,7 +11,7 @@ import org.mapstruct.Mapping;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = {ReputationMapper.class})
+@Mapper(componentModel = "spring")
 public interface AccountMapper {
 //    @Mapping(source = "reputation", target = "reputation")
     AccountDTO toAccountDTO(Account account);

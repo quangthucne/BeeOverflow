@@ -65,7 +65,7 @@ public class Question {
     @OneToMany(mappedBy = "question", fetch = FetchType.LAZY)
     private List<Tag> tags;
 
-//    @JsonManagedReference
+    @JsonManagedReference
     @OneToMany(mappedBy = "ques", fetch = FetchType.LAZY)
     private List<ImagesQue> imagesQues;
 

@@ -10,16 +10,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring", uses = {AccountMapper.class})
+@Mapper(componentModel = "spring")
 public interface AnswerMapper {
 
     @Mapping(target = "account", source = "account")
     @Mapping(source = "ques.id", target = "quesId")
     @Mapping(source = "parent.id", target = "parentId")
     AnswerDTO answerToAnswerDTO(Answer answer);
-
-    @Named("accountToAccountDTO")
-    AccountDTO accountToAccountDTO(Account account);
+//
+//    @Named("accountToAccountDTO")
+//    AccountDTO accountToAccountDTO(Account account);
 
     List<AnswerDTO> answersToAnswerDTOs(List<Answer> answers);
 

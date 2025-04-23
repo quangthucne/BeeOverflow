@@ -43,11 +43,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/account/login").permitAll()
                         .requestMatchers("/account/register").permitAll()
-
+                        .requestMatchers(("/answer/**")).hasRole("USER")
+                        .requestMatchers("/account/**").hasRole("USER")
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Cho phép //
                                                                                 // OPTIONS
-                        .requestMatchers("/question/add").hasRole("USER") // Yêu cầu xác thực
-                        .requestMatchers("/question/**").permitAll() // Cho phép các endpoint khác
+                        .requestMatchers("/document/add").hasRole("ADMIN")
+                        .requestMatchers("/question/add", "question/delete", "question/update", "/vote/question", "/vote/answer").hasRole("USER") // Yêu cầu xác thực
+                        .requestMatchers("/question").permitAll() // Cho phép các endpoint khác
                         .anyRequest().permitAll())
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 

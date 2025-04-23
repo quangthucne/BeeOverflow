@@ -175,6 +175,7 @@ import AnswerNode from './AnswerNode.vue'
 import AnswerInputComponent from './AnswerInputComponent.vue'
 import { QuestionDTO, Response } from './types'
 import Cookies from 'js-cookie'
+import router from '@/router'
 
 const route = useRoute()
 const question = ref<QuestionDTO | null>(null)
@@ -182,6 +183,7 @@ const loading = ref(true)
 const error = ref<string | null>(null)
 const expandedAnswers = ref<number[]>([])
 const questionId = route.params.id
+const token = Cookies.get('token')
 
 const showMainAnswerForm = ref(false)
 const toggleMainAnswerForm = () => {
@@ -196,14 +198,17 @@ const toggleMainAnswerForm = () => {
 const accountId = getAccountIdFromToken()
 console.log('accountid: ' + accountId)
 function getAccountIdFromToken() {
-  const token = Cookies.get('token')
-  if (!token) return null
-
-  const payload = JSON.parse(atob(token.split('.')[1]))
-  return payload.accountId || payload.id
+  if (token) {
+    const payload = JSON.parse(atob(token.split('.')[1]))
+    return payload.accountId || payload.id
+  }
 }
 
 const toggleAnswer = (id: number) => {
+  if (!token) {
+    router.push('/login')
+    return
+  }
   expandedAnswers.value = expandedAnswers.value.includes(id)
     ? expandedAnswers.value.filter((item) => item !== id)
     : [...expandedAnswers.value, id]
@@ -245,6 +250,10 @@ const formatDate = (dateStr: string) =>
 const answerForms = ref<Record<number, boolean>>({})
 
 const toggleAnswerFormWithParent = (answerId: number) => {
+  if (!token) {
+    router.push('/login')
+    return
+  }
   answerForms.value[answerId] = !answerForms.value[answerId]
 }
 

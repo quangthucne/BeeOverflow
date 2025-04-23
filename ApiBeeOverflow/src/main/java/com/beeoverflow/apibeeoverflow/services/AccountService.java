@@ -54,6 +54,10 @@ public class AccountService {
         return accountJPA.findById(accountId);
     }
 
+    public AccountDTO findAccountById(int accountId) {
+        return accountMapper.toAccountDTO(getAccountById(accountId));
+    }
+
     // Create Account
     public Account create(AccountBean accountBean) {
         Account account = new Account();

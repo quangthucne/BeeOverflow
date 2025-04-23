@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import InputDetail from '@/components/User/InputDetail.vue'
 import UploadImage from '@/components/User/UploadImage.vue'
 import axios from 'axios'
@@ -38,7 +38,6 @@ watch(
     content.value = newVal || ''
   },
 )
-
 const handleImageUpload = (files: File[]) => {
   imageFiles.value = files
 }

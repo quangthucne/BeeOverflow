@@ -70,4 +70,13 @@ public class AccountController {
         response.setData(accountService.getAccounts());
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/{id}")
+    public ResponseEntity<Response> getAccountById(@PathVariable("id") int id) {
+        Response response = new Response();
+        response.setStatus(1);
+        response.setMessage("Account with id " + id + " exists");
+        response.setData(accountService.findAccountById(id));
+        return ResponseEntity.ok(response);
+    }
 }

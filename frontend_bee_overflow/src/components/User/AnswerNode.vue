@@ -92,7 +92,7 @@ export default defineComponent({
     answer: { type: Object as PropType<Answer>, required: true },
     level: { type: Number, required: true },
     expanded: { type: Array as PropType<number[]>, required: true },
-    currentAccountId: { type: Number, required: true },
+    currentAccountId: { type: Number, required: false },
   },
   emits: ['toggle'],
   setup(props) {

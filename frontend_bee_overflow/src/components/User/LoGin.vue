@@ -47,7 +47,7 @@ const submitLogin = async () => {
     // Lưu token vào cookie
     if (status === 1) {
       const token = res.data.data
-      Cookies.set('token', token, { expires: 0.5 })
+      Cookies.set('token', token, { path: '/', expires: 7 }) // expires: 7 ngày
 
       Swal.fire({
         icon: 'success',

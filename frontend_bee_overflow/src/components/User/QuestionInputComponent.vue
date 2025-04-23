@@ -131,7 +131,18 @@ const addNewTag = (newTag: string) => {
   form.tags.push(tag)
 }
 
+function getAccountIdFromToken() {}
+
 onMounted(async () => {
+  const token = Cookies.get('token')
+  const payload = JSON.parse(atob(token.split('.')[1]))
+  return payload.accountId || payload.id
+  if (!token) {
+    Swal.fire('Phiên đăng nhập hết hạn', 'Vui lòng đăng nhập lại.', 'warning')
+    router.push('/login')
+    return
+  }
+
   if (isEditMode.value) {
     try {
       const token = Cookies.get('token')

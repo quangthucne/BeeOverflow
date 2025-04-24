@@ -63,7 +63,7 @@ public class QuesController {
         Response response = new Response();
         if (errors.hasErrors()) {
             response.setMessage(errors.getAllErrors().get(0).getDefaultMessage());
-            response.setStatus(1);
+            response.setStatus(0);
             response.setData(null);
             return ResponseEntity.ok(response);
         } else {

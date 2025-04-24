@@ -55,12 +55,12 @@
 
         <div class="d-flex align-items-center gap-2">
           <button class="btn btn-outline-success btn-sm" @click="voteQuestion('up')">
-  <i class="fas fa-arrow-up">Upvote</i>
-</button>
-<button class="btn btn-outline-danger btn-sm" @click="voteQuestion('down')">
-  <i class="fas fa-arrow-down">Downvote</i>
-</button>
-<span class="text-muted">Điểm: {{ question.questionVotes.count || 0 }}</span>
+            <i class="fas fa-arrow-up">Upvote</i>
+          </button>
+          <button class="btn btn-outline-danger btn-sm" @click="voteQuestion('down')">
+            <i class="fas fa-arrow-down">Downvote</i>
+          </button>
+          <span class="text-muted">Điểm: {{ question.questionVotes.count || 0 }}</span>
 
           <div class="mt-3">
             <button class="btn btn-outline-primary mb-3" @click="toggleMainAnswerForm">
@@ -80,7 +80,6 @@
               </div>
             </transition>
           </div>
-
         </div>
       </div>
     </div>
@@ -110,27 +109,29 @@
 
             <!-- Toggle form trả lời -->
             <!-- Dòng chứa nút Trả lời và Vote -->
-<div class="d-flex justify-content-between align-items-center mt-2 ms-5 mb-2">
-  <!-- Nút Trả lời bên trái -->
-  <button
-    class="btn btn-outline-primary"
-    @click="toggleAnswerFormWithParent(answer.id)"
-  >
-    {{ answerForms[answer.id] ? 'Ẩn form trả lời' : 'Trả lời' }}
-  </button>
+            <div class="d-flex justify-content-between align-items-center mt-2 ms-5 mb-2">
+              <!-- Nút Trả lời bên trái -->
+              <button
+                class="btn btn-outline-primary"
+                @click="toggleAnswerFormWithParent(answer.id)"
+              >
+                {{ answerForms[answer.id] ? 'Ẩn form trả lời' : 'Trả lời' }}
+              </button>
 
-  <!-- Cụm Vote bên phải -->
-  <div class="d-flex align-items-center gap-2">
-    <button class="btn btn-outline-success btn-sm" @click="voteAnswer('up', answer.id)">
-      <i class="fas fa-arrow-up"></i> Upvote
-    </button>
-    <button class="btn btn-outline-danger btn-sm" @click="voteAnswer('down', answer.id)">
-      <i class="fas fa-arrow-down"></i> Downvote
-    </button>
-    <span class="text-muted">Điểm: {{ answer.answerVotes?.count || 0 }}</span>
-  </div>
-</div>
-
+              <!-- Cụm Vote bên phải -->
+              <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-outline-success btn-sm" @click="voteAnswer('up', answer.id)">
+                  <i class="fas fa-arrow-up"></i> Upvote
+                </button>
+                <button
+                  class="btn btn-outline-danger btn-sm"
+                  @click="voteAnswer('down', answer.id)"
+                >
+                  <i class="fas fa-arrow-down"></i> Downvote
+                </button>
+                <span class="text-muted">Điểm: {{ answer.answerVotes?.count || 0 }}</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -200,7 +201,6 @@ const toggleMainAnswerForm = () => {
     answerForms.value[key] = false
   })
 }
-
 
 // Lấy accountId từ token
 const accountId = getAccountIdFromToken()
@@ -310,11 +310,8 @@ onMounted(() => {
   if (imageModal.value) bsModal = new Modal(imageModal.value)
 })
 
-
-
-const token = Cookies.get('token')
+// const token = Cookies.get('token')
 const headers = token ? { Authorization: `Bearer ${token}` } : {}
-
 
 //voteQuestion
 async function voteQuestion(voteType: 'up' | 'down') {
@@ -323,7 +320,7 @@ async function voteQuestion(voteType: 'up' | 'down') {
   const typeMap = {
     up: 1,
     down: 0,
-    neutral: -1
+    neutral: -1,
   }
 
   try {
@@ -331,9 +328,9 @@ async function voteQuestion(voteType: 'up' | 'down') {
       'http://localhost:8080/vote/question',
       {
         questionId: question.value.id,
-        type: typeMap[voteType]
+        type: typeMap[voteType],
       },
-      { headers }
+      { headers },
     )
 
     console.log('Vote response:', response.data)
@@ -356,26 +353,19 @@ async function voteAnswer(voteType: 'up' | 'down', answerId: number) {
 
   const payload = {
     answerId,
-    type: typeMap[voteType]
+    type: typeMap[voteType],
   }
 
   console.log('Voting answer with payload:', payload)
 
   try {
-    const response = await axios.post(
-      'http://localhost:8080/vote/answer',
-      payload,
-      { headers }
-    )
+    const response = await axios.post('http://localhost:8080/vote/answer', payload, { headers })
 
     // ... handle response
   } catch (error) {
     console.error('Vote answer thất bại:', error)
   }
 }
-
-
-
 </script>
 
 <style scoped>
